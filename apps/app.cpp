@@ -2,7 +2,7 @@
 //
 
 #include <windows.h>
-#include <WinUser.h>
+#include <winuser.h>
 #include <wrl.h>
 #include <iostream>
 #include <d3d.h>
@@ -40,7 +40,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT umessage, WPARAM wparam, LPARAM lparam)
 
 int main()
 {
-	LPCWSTR applicationName = L"My3DApp";
+	LPCSTR applicationName = "Application";
 	HINSTANCE hInstance = GetModuleHandle(nullptr);
 
 #pragma region Window init
@@ -161,7 +161,7 @@ int main()
 		// If there was  nothing in the error message then it simply could not find the shader file itself.
 		else
 		{
-			MessageBox(hWnd, L"shader.hlsl", L"Missing Shader File", MB_OK);
+			MessageBox(hWnd, "shader.hlsl", "Missing Shader File", MB_OK);
 		}
 
 		return 0;
@@ -323,8 +323,8 @@ int main()
 
 			totalTime -= 1.0f;
 
-			WCHAR text[256];
-			swprintf_s(text, TEXT("FPS: %f"), fps);
+			CHAR text[256];
+            sprintf_s(text, TEXT("FPS: %f"), fps);
 			SetWindowText(hWnd, text);
 
 			frameCount = 0;
@@ -344,14 +344,3 @@ int main()
 
     std::cout << "Hello World!\n";
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
