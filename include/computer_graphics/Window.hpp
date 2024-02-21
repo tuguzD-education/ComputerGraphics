@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef WINDOW_HPP_INCLUDED
+#define WINDOW_HPP_INCLUDED
+
 #include <wtypes.h>
 
 namespace computer_graphics {
@@ -31,3 +34,5 @@ class Window {
 };
 
 }
+
+#endif //WINDOW_HPP_INCLUDED

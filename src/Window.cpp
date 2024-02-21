@@ -1,4 +1,4 @@
-#include <computer_graphics/Window.hpp>
+#include <computer_graphics/window.hpp>
 
 #include <winuser.h>
 #include <iostream>
