@@ -1,186 +1,49 @@
 #include <computer_graphics/game.hpp>
 
-#include <wrl.h>
-#include <d3d11.h>
-#include <d3dcompiler.h>
-#include <directxmath.h>
+#include <computer_graphics/detail/check_result.hpp>
+#include <computer_graphics/TriangleComponent.hpp>
 
-#include <exception>
 #include <array>
 
 namespace computer_graphics {
 
-namespace detail {
-
-inline void CheckResult(const HRESULT result, const char *const message = nullptr) {
-  if (FAILED(result)) {
-//    window_.ErrorBox(message, "Exception");
-    throw std::exception{message};
-  }
-}
-
-}
-
 Game::Game(Window &window) : window_{window} {
+  auto [width, height] = window.GetClientDimensions();
+  initial_width_ = width;
+  initial_height_ = height;
+
   InitializeDevice();
   InitializeSwapChain(window);
   InitializeRenderTargetView();
-}
 
-const Timer &Game::GetTimer() const {
-  return timer_;
+  std::array vertices{
+      TriangleComponent::Vertex{
+          .position = {0.5f, 0.5f, 0.5f, 1.0f},
+          .color = {1.0f, 0.0f, 0.0f, 1.0f},
+      },
+      TriangleComponent::Vertex{
+          .position = {-0.5f, -0.5f, 0.5f, 1.0f},
+          .color = {0.0f, 0.0f, 1.0f, 1.0f},
+      },
+      TriangleComponent::Vertex{
+          .position = {0.5f, -0.5f, 0.5f, 1.0f},
+          .color = {0.0f, 1.0f, 0.0f, 1.0f},
+      },
+      TriangleComponent::Vertex{
+          .position = {-0.5f, 0.5f, 0.5f, 1.0f},
+          .color = {1.0f, 1.0f, 1.0f, 1.0f},
+      },
+  };
+
+  std::array indices{0, 1, 2, 1, 0, 3};
+  auto triangle_component =
+      std::make_unique<TriangleComponent>(*this, vertices, indices);
+  components_.push_back(std::move(triangle_component));
 }
 
 void Game::Run() {
-  ID3DBlob *vertexBC = nullptr;
-  ID3DBlob *errorVertexCode = nullptr;
-  HRESULT res = D3DCompileFromFile(
-      L"./resources/shaders/shader.hlsl",
-      nullptr /*macros*/,
-      nullptr /*include*/,
-      "VSMain",
-      "vs_5_0",
-      D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-      0,
-      &vertexBC,
-      &errorVertexCode
-  );
-
-  if (FAILED(res)) {
-    if (errorVertexCode)
-      // If the shader failed to compile it should have written something to the error message.
-      window_.ErrorBox(
-          (char *) (errorVertexCode->GetBufferPointer()),
-          "Shader failed to compile"
-      );
-    else
-      // If there was nothing in the error message then it simply could not find the shader file itself.
-      window_.ErrorBox(
-          "shader.hlsl",
-          "Shader file is missing!"
-      );
-
-    return;
-  }
-
-  D3D_SHADER_MACRO Shader_Macros[] = {
-      "TEST", "1",
-      "TCOLOR", "float4(0.0f, 1.0f, 0.0f, 1.0f)",
-      nullptr, nullptr,
-  };
-
-  ID3DBlob *pixelBC;
-  ID3DBlob *errorPixelCode;
-  res = D3DCompileFromFile(
-      L"./resources/shaders/shader.hlsl",
-      Shader_Macros /*macros*/,
-      nullptr /*include*/,
-      "PSMain",
-      "ps_5_0",
-      D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-      0,
-      &pixelBC,
-      &errorPixelCode
-  );
-
-  ID3D11VertexShader *vertexShader;
-  ID3D11PixelShader *pixelShader;
-  device_->CreateVertexShader(
-      vertexBC->GetBufferPointer(),
-      vertexBC->GetBufferSize(),
-      nullptr, &vertexShader);
-
-  device_->CreatePixelShader(
-      pixelBC->GetBufferPointer(),
-      pixelBC->GetBufferSize(),
-      nullptr, &pixelShader);
-
-  D3D11_INPUT_ELEMENT_DESC inputElements[] = {
-      D3D11_INPUT_ELEMENT_DESC{
-          "POSITION",
-          0,
-          DXGI_FORMAT_R32G32B32A32_FLOAT,
-          0,
-          0,
-          D3D11_INPUT_PER_VERTEX_DATA,
-          0},
-      D3D11_INPUT_ELEMENT_DESC{
-          "COLOR",
-          0,
-          DXGI_FORMAT_R32G32B32A32_FLOAT,
-          0,
-          D3D11_APPEND_ALIGNED_ELEMENT,
-          D3D11_INPUT_PER_VERTEX_DATA,
-          0}
-  };
-
-  ID3D11InputLayout *layout;
-  device_->CreateInputLayout(
-      inputElements,
-      2,
-      vertexBC->GetBufferPointer(),
-      vertexBC->GetBufferSize(),
-      &layout);
-
-  DirectX::XMFLOAT4 points[8] = {
-      DirectX::XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f),
-      DirectX::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f),
-      DirectX::XMFLOAT4(-0.5f, -0.5f, 0.5f, 1.0f),
-      DirectX::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f),
-      DirectX::XMFLOAT4(0.5f, -0.5f, 0.5f, 1.0f),
-      DirectX::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f),
-      DirectX::XMFLOAT4(-0.5f, 0.5f, 0.5f, 1.0f),
-      DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f),
-  };
-
-  D3D11_BUFFER_DESC vertexBufDesc = {};
-  vertexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-  vertexBufDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-  vertexBufDesc.CPUAccessFlags = 0;
-  vertexBufDesc.MiscFlags = 0;
-  vertexBufDesc.StructureByteStride = 0;
-  vertexBufDesc.ByteWidth = sizeof(DirectX::XMFLOAT4) * std::size(points);
-
-  D3D11_SUBRESOURCE_DATA vertexData = {};
-  vertexData.pSysMem = points;
-  vertexData.SysMemPitch = 0;
-  vertexData.SysMemSlicePitch = 0;
-
-  ID3D11Buffer *vb;
-  device_->CreateBuffer(&vertexBufDesc, &vertexData, &vb);
-
-  int indices[] = {0, 1, 2, 1, 0, 3};
-  D3D11_BUFFER_DESC indexBufDesc = {};
-  indexBufDesc.Usage = D3D11_USAGE_DEFAULT;
-  indexBufDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-  indexBufDesc.CPUAccessFlags = 0;
-  indexBufDesc.MiscFlags = 0;
-  indexBufDesc.StructureByteStride = 0;
-  indexBufDesc.ByteWidth = sizeof(int) * std::size(indices);
-
-  D3D11_SUBRESOURCE_DATA indexData = {};
-  indexData.pSysMem = indices;
-  indexData.SysMemPitch = 0;
-  indexData.SysMemSlicePitch = 0;
-
-  ID3D11Buffer *ib;
-  device_->CreateBuffer(&indexBufDesc, &indexData, &ib);
-
-  UINT strides[] = {32};
-  UINT offsets[] = {0};
-
-  CD3D11_RASTERIZER_DESC rastDesc = {};
-  rastDesc.CullMode = D3D11_CULL_NONE;
-  rastDesc.FillMode = D3D11_FILL_SOLID;
-
-  ID3D11RasterizerState *rastState;
-  res = device_->CreateRasterizerState(&rastDesc, &rastState);
-
-  device_context_->RSSetState(rastState);
-
   MSG msg = {};
-  bool isExitRequested = false;
-  while (!isExitRequested) {
+  while (true) {
     // Handle the windows messages.
     while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
       TranslateMessage(&msg);
@@ -188,31 +51,8 @@ void Game::Run() {
     }
 
     // If windows signals to end the application then exit out.
-    if (msg.message == WM_QUIT) {
-      isExitRequested = true;
-    }
-
-    device_context_->ClearState();
-
-    device_context_->RSSetState(rastState);
-
-    D3D11_VIEWPORT viewport = {
-        .TopLeftX = 0,
-        .TopLeftY = 0,
-        .Width = 800,
-        .Height = 800,
-        .MinDepth = 0,
-        .MaxDepth = 1.0f,
-    };
-
-    device_context_->RSSetViewports(1, &viewport);
-
-    device_context_->IASetInputLayout(layout);
-    device_context_->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    device_context_->IASetIndexBuffer(ib, DXGI_FORMAT_R32_UINT, 0);
-    device_context_->IASetVertexBuffers(0, 1, &vb, strides, offsets);
-    device_context_->VSSetShader(vertexShader, nullptr, 0);
-    device_context_->PSSetShader(pixelShader, nullptr, 0);
+    if (msg.message == WM_QUIT)
+      break;
 
     timer_.Tick();
 
@@ -220,26 +60,42 @@ void Game::Run() {
     sprintf_s(text, TEXT("FPS: %f"), timer_.FramesPerSecond());
     window_.SetTitle(text);
 
-    device_context_->OMSetRenderTargets(
-        1, render_target_view_.GetAddressOf(), nullptr
-    );
-
-    float start_time = timer_.StartTime();
-    float red = start_time - std::floor(start_time);
-    float color[] = {red, 0.1f, 0.1f, 1.0f};
-
-    device_context_->ClearRenderTargetView(
-        render_target_view_.Get(), color
-    );
-
-    device_context_->DrawIndexed(6, 0, 0);
-
-    device_context_->OMSetRenderTargets(
-        0, nullptr, nullptr
-    );
-
-    swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
+    Draw();
   }
+}
+
+void Game::Draw() {
+  device_context_->ClearState();
+
+  D3D11_VIEWPORT viewport{
+      .TopLeftX = 0,
+      .TopLeftY = 0,
+      .Width = static_cast<FLOAT>(initial_width_),
+      .Height = static_cast<FLOAT>(initial_height_),
+      .MinDepth = 0,
+      .MaxDepth = 1.0f,
+  };
+  std::array viewports{viewport};
+  device_context_->RSSetViewports(viewports.size(), viewports.data());
+
+  device_context_->OMSetRenderTargets(
+      1, render_target_view_.GetAddressOf(), nullptr
+  );
+
+  float start_time = timer_.StartTime();
+  float red = start_time - std::floor(start_time);
+  DirectX::XMFLOAT4 color{red, 0.1f, 0.1f, 1.0f};
+  device_context_->ClearRenderTargetView(
+      render_target_view_.Get(), &color.x
+  );
+
+  for (const auto &component : components_) {
+    component->Draw();
+  }
+  device_context_->OMSetRenderTargets(
+      0, nullptr, nullptr
+  );
+  swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
 }
 
 void Game::InitializeDevice() {
@@ -264,22 +120,22 @@ void Game::InitializeDevice() {
 void Game::InitializeSwapChain(const Window &window) {
   HRESULT result;
 
-  ComPtr<IDXGIDevice> dxgi_device;
+  detail::D3DPtr<IDXGIDevice> dxgi_device;
   result = device_.As(&dxgi_device);
   detail::CheckResult(result, "Failed to cast device to DXGI device");
 
-  ComPtr<IDXGIAdapter> dxgi_adapter;
+  detail::D3DPtr<IDXGIAdapter> dxgi_adapter;
   result = dxgi_device->GetAdapter(&dxgi_adapter);
   detail::CheckResult(result, "Failed to retrieve DXGI adapter");
 
-  ComPtr<IDXGIFactory> dxgi_factory;
+  detail::D3DPtr<IDXGIFactory> dxgi_factory;
   result = dxgi_adapter->GetParent(IID_IDXGIFactory, &dxgi_factory);
   detail::CheckResult(result, "Failed to retrieve DXGI factory");
 
   DXGI_SWAP_CHAIN_DESC swap_chain_desc = {
       .BufferDesc = {
-//          .Width = width,
-//          .Height = height,
+          .Width = static_cast<UINT>(initial_width_),
+          .Height = static_cast<UINT>(initial_height_),
           .RefreshRate = {
               .Numerator = 60,
               .Denominator = 1,
@@ -310,7 +166,7 @@ void Game::InitializeSwapChain(const Window &window) {
 void Game::InitializeRenderTargetView() {
   HRESULT result;
 
-  ComPtr<ID3D11Texture2D> back_buffer;
+  detail::D3DPtr<ID3D11Texture2D> back_buffer;
   result = swap_chain_->GetBuffer(
       0, IID_ID3D11Texture2D, &back_buffer
   );

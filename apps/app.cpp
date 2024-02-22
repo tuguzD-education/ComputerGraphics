@@ -7,14 +7,11 @@
 #pragma comment(lib, "dxguid.lib")
 
 int main() {
-  constexpr LONG width = 800, height = 800;
   computer_graphics::Window window{
-      TEXT("Application"), width, height,
-      GetModuleHandle(nullptr),
+      TEXT("Application"), 800, 800
   };
-
   computer_graphics::Game game{window};
-  game.Run();
 
+  game.Run();
   return 0;
 }

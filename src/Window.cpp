@@ -1,6 +1,5 @@
 #include <computer_graphics/window.hpp>
 
-#include <winuser.h>
 #include <iostream>
 
 namespace computer_graphics {
@@ -96,7 +95,7 @@ RECT Window::GetRect() const {
   return rect;
 }
 
-Dimensions Window::GetDimensions() const {
+auto Window::GetDimensions() const -> Dimensions {
   RECT rect = GetRect();
   return Dimensions{
       .width = rect.right - rect.left,
@@ -110,7 +109,7 @@ RECT Window::GetClientRect() const {
   return rect;
 }
 
-Dimensions Window::GetClientDimensions() const {
+auto Window::GetClientDimensions() const -> Dimensions {
   RECT rect = GetClientRect();
   return Dimensions{
       .width = rect.right - rect.left,
