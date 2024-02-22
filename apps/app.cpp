@@ -1,12 +1,11 @@
 #include <computer_graphics/window.hpp>
+#include <computer_graphics/timer.hpp>
 #include <computer_graphics/game.hpp>
 
 #include <wrl.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include <directxmath.h>
-#include <chrono>
-
 
 #pragma comment(lib, "d3d11.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -19,13 +18,12 @@ int main() {
       TEXT("Application"), width, height,
       GetModuleHandle(nullptr),
   };
-
-  HRESULT res;
   computer_graphics::Game game{window};
+  computer_graphics::Timer timer{};
 
   ID3DBlob *vertexBC = nullptr;
   ID3DBlob *errorVertexCode = nullptr;
-  res = D3DCompileFromFile(
+  HRESULT res = D3DCompileFromFile(
       L"./resources/shaders/shader.hlsl",
       nullptr /*macros*/,
       nullptr /*include*/,
@@ -46,7 +44,10 @@ int main() {
       );
     else
       // If there was nothing in the error message then it simply could not find the shader file itself.
-      window.ErrorBox("shader.hlsl", "Shader file is missing!");
+      window.ErrorBox(
+          "shader.hlsl",
+          "Shader file is missing!"
+      );
 
     return 0;
   }
@@ -166,10 +167,6 @@ int main() {
 
   game.device_context_->RSSetState(rastState);
 
-  std::chrono::time_point<std::chrono::steady_clock> PrevTime = std::chrono::steady_clock::now();
-  float totalTime = 0;
-  unsigned int frameCount = 0;
-
   MSG msg = {};
   bool isExitRequested = false;
   while (!isExitRequested) {
@@ -205,31 +202,20 @@ int main() {
     game.device_context_->VSSetShader(vertexShader, nullptr, 0);
     game.device_context_->PSSetShader(pixelShader, nullptr, 0);
 
-    auto curTime = std::chrono::steady_clock::now();
-    float deltaTime =
-        std::chrono::duration_cast<std::chrono::microseconds>(curTime - PrevTime).count() / 1000000.0f;
-    PrevTime = curTime;
+    timer.Tick();
 
-    totalTime += deltaTime;
-    frameCount++;
-
-    if (totalTime > 1.0f) {
-      float fps = frameCount / totalTime;
-
-      totalTime -= 1.0f;
-
-      CHAR text[256];
-      sprintf_s(text, TEXT("FPS: %f"), fps);
-      window.SetTitle(text);
-
-      frameCount = 0;
-    }
+    CHAR text[256];
+    sprintf_s(text, TEXT("FPS: %f"), timer.FramesPerSecond());
+    window.SetTitle(text);
 
     game.device_context_->OMSetRenderTargets(
         1, game.render_target_view_.GetAddressOf(), nullptr
     );
 
-    float color[] = {totalTime, 0.1f, 0.1f, 1.0f};
+    float start_time = timer.StartTime();
+    float red = start_time - std::floor(start_time);
+    float color[] = {red, 0.1f, 0.1f, 1.0f};
+
     game.device_context_->ClearRenderTargetView(
         game.render_target_view_.Get(), color
     );
