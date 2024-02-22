@@ -1,7 +1,7 @@
 #include <computer_graphics/game.hpp>
 
 #include <computer_graphics/detail/check_result.hpp>
-#include <computer_graphics/TriangleComponent.hpp>
+#include <computer_graphics/triangle_component.hpp>
 
 #include <array>
 

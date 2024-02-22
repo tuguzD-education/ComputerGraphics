@@ -1,4 +1,4 @@
-#include "computer_graphics/TriangleComponent.hpp"
+#include "computer_graphics/triangle_component.hpp"
 
 #include "computer_graphics/detail/check_result.hpp"
 #include "computer_graphics/detail/string_api_set.hpp"
