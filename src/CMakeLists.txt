@@ -22,3 +22,7 @@ set(SOURCE_LIST
 add_library(computer_graphics ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(computer_graphics PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_features(computer_graphics PUBLIC cxx_std_20)
+target_link_libraries(computer_graphics PUBLIC
+        d3d11.lib dxgi.lib d3dcompiler.lib dxguid.lib
+        #Microsoft::DirectXTK
+)
