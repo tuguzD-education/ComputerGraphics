@@ -13,4 +13,4 @@ std::wstring MultiByteToWideChar(UINT code_page, DWORD dw_flags, std::string_vie
 
 }
 
-#endif //DETAIL_STRING_API_SET_HPP_INCLUDED
+#endif  // DETAIL_STRING_API_SET_HPP_INCLUDED

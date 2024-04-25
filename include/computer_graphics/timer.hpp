@@ -40,6 +40,6 @@ class Timer {
     float frames_per_second_;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //TIMER_HPP_INCLUDED
+#endif  // TIMER_HPP_INCLUDED

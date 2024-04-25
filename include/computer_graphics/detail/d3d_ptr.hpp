@@ -7,9 +7,9 @@
 
 namespace computer_graphics::detail {
 
-template<typename T>
+template <typename T>
 using D3DPtr = Microsoft::WRL::ComPtr<T>;
 
 }
 
-#endif //DETAIL_D3D_PTR_HPP_INCLUDED
+#endif  // DETAIL_D3D_PTR_HPP_INCLUDED

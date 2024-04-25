@@ -3,18 +3,17 @@
 #ifndef GAME_HPP_INCLUDED
 #define GAME_HPP_INCLUDED
 
-#include "game.fwd"
-#include "detail/d3d_ptr.hpp"
-
-#include "component.hpp"
-#include "window.hpp"
-#include "timer.hpp"
-
 #include <d3d11.h>
 #include <wrl/client.h>
 
-#include <vector>
 #include <memory>
+#include <vector>
+
+#include "component.hpp"
+#include "detail/d3d_ptr.hpp"
+#include "game.fwd"
+#include "timer.hpp"
+#include "window.hpp"
 
 namespace computer_graphics {
 
@@ -47,6 +46,6 @@ class Game {
     detail::D3DPtr<ID3D11Device> device_;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //GAME_HPP_INCLUDED
+#endif  // GAME_HPP_INCLUDED

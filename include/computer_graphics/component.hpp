@@ -27,6 +27,6 @@ class Component {
     std::reference_wrapper<Game> game_;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //COMPONENT_HPP_INCLUDED
+#endif  // COMPONENT_HPP_INCLUDED

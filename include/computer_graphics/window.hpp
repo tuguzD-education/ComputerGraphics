@@ -10,8 +10,8 @@ namespace computer_graphics {
 class Window {
   public:
     struct Dimensions {
-      LONG width;
-      LONG height;
+        LONG width;
+        LONG height;
     };
 
     explicit Window(LPCTSTR name, LONG width, LONG height, HINSTANCE instanceHandle = nullptr);
@@ -33,6 +33,6 @@ class Window {
     HWND handle;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //WINDOW_HPP_INCLUDED
+#endif  // WINDOW_HPP_INCLUDED

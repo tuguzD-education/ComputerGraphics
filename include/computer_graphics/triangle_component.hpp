@@ -3,30 +3,25 @@
 #ifndef TRIANGLECOMPONENT_HPP_INCLUDED
 #define TRIANGLECOMPONENT_HPP_INCLUDED
 
-#include "detail/d3d_ptr.hpp"
-
-#include "component.hpp"
-
 #include <directxmath.h>
 #include <wrl/client.h>
 
 #include <span>
+
+#include "component.hpp"
+#include "detail/d3d_ptr.hpp"
 
 namespace computer_graphics {
 
 class TriangleComponent : public Component {
   public:
     struct Vertex {
-      DirectX::XMFLOAT4 position;
-      DirectX::XMFLOAT4 color;
+        DirectX::XMFLOAT4 position;
+        DirectX::XMFLOAT4 color;
     };
     using Index = int;
 
-    explicit TriangleComponent(
-        Game &game,
-        std::span<Vertex> vertices,
-        std::span<Index> indices
-    );
+    explicit TriangleComponent(Game &game, std::span<Vertex> vertices, std::span<Index> indices);
 
     void Update(float delta_time) override;
     void Draw() override;
@@ -51,6 +46,6 @@ class TriangleComponent : public Component {
     detail::D3DPtr<ID3DBlob> vertex_byte_code_;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //TRIANGLECOMPONENT_HPP_INCLUDED
+#endif  // TRIANGLECOMPONENT_HPP_INCLUDED
