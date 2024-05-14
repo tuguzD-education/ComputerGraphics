@@ -5,6 +5,8 @@
 
 #include <windows.h>
 
+#include <string_view>
+
 namespace computer_graphics {
 
 class Window {
@@ -14,9 +16,12 @@ class Window {
         LONG height;
     };
 
-    explicit Window(LPCTSTR name, LONG width, LONG height, HINSTANCE instanceHandle = nullptr);
+    explicit Window(
+        std::string_view name, LONG width,
+        LONG height, HINSTANCE instance_handle = nullptr
+    );
 
-    bool ErrorBox(LPCTSTR lpText, LPCTSTR lpCaption, UINT uType = MB_OK);
+    bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK);
 
     [[nodiscard]] HWND GetRawHandle() const;
     [[nodiscard]] HINSTANCE GetRawInstanceHandle() const;
@@ -27,10 +32,22 @@ class Window {
     [[nodiscard]] RECT GetClientRect() const;
     [[nodiscard]] Dimensions GetClientDimensions() const;
 
-    bool SetTitle(LPCTSTR title);
+    [[nodiscard]] bool IsDestroyed() const;
+
+    bool SetTitle(std::string_view title);
+    void ProcessQueueMessages();
+    void Destroy();
 
   private:
-    HWND handle;
+    friend class InputDevice;
+
+    static LRESULT CALLBACK WndProc(
+        HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param
+    );
+
+    HWND handle_;
+    InputDevice *input_device_;
+    bool is_destroyed_;
 };
 
 }  // namespace computer_graphics

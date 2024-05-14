@@ -1,6 +1,7 @@
 #include "computer_graphics/game.hpp"
 
 #include <array>
+#include <format>
 
 #include "computer_graphics/detail/check_result.hpp"
 #include "computer_graphics/triangle_component.hpp"
@@ -41,25 +42,26 @@ Game::Game(Window &window) : window_{window} {
 }
 
 void Game::Run() {
-    MSG msg = {};
-    while (true) {
-        // Handle the windows messages.
-        while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+  while (true) {
+    window_.ProcessQueueMessages();
+    if (window_.IsDestroyed())
+      break;
 
-        // If windows signals to end the application then exit out.
-        if (msg.message == WM_QUIT) break;
+    timer_.Tick();
+    Draw();
 
-        timer_.Tick();
+    if (float fps = timer_.FramesPerSecond(); fps > 0) {
+      static std::string text;
 
-        CHAR text[256];
-        sprintf_s(text, "FPS: %f", timer_.FramesPerSecond());
-        window_.SetTitle(text);
-
-        Draw();
+      std::format_to(std::back_inserter(text), "FPS: {}", fps);
+      window_.SetTitle(text);
+      text.clear();
     }
+  }
+}
+
+void Game::Exit() {
+  window_.Destroy();
 }
 
 void Game::Draw() {

@@ -7,6 +7,9 @@ set(HEADER_LIST
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/game.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/timer.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/window.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/input_key.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/input_device.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/delegates.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/component.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/triangle_component.hpp)
 set(SOURCE_LIST
@@ -16,6 +19,8 @@ set(SOURCE_LIST
         game.cpp
         timer.cpp
         window.cpp
+        input_device.cpp
+        delegates.cpp
         component.cpp
         triangle_component.cpp)
 
