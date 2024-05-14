@@ -7,7 +7,7 @@
 
 namespace computer_graphics::detail {
 
-std::string GetLastError();
+std::string LastError();
 
 }
 

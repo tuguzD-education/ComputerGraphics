@@ -3,8 +3,6 @@
 #ifndef INPUT_DEVICE_HPP_INCLUDED
 #define INPUT_DEVICE_HPP_INCLUDED
 
-#include <directxmath.h>
-
 #include <unordered_set>
 
 #include "delegates.hpp"
@@ -13,34 +11,34 @@
 
 namespace computer_graphics {
 
+struct MouseMoveData {
+    math::Vector2 position;
+    math::Vector2 offset;
+    int wheel_delta;
+};
+
+DECLARE_MULTICAST_DELEGATE(OnMouseMove, const MouseMoveData &);
+DECLARE_MULTICAST_DELEGATE(OnInputKeyUp, InputKey);
+DECLARE_MULTICAST_DELEGATE(OnInputKeyDown, InputKey);
+
 class InputDevice {
   public:
-    struct MouseMoveData {
-        DirectX::XMFLOAT2 position;
-        DirectX::XMFLOAT2 offset;
-        int wheel_delta;
-    };
-
-    DECLARE_MULTICAST_DELEGATE(OnMouseMove, const MouseMoveData &);
-    DECLARE_MULTICAST_DELEGATE(OnInputKeyUp, InputKey);
-    DECLARE_MULTICAST_DELEGATE(OnInputKeyDown, InputKey);
-
     explicit InputDevice(Window &window);
     ~InputDevice();
 
     [[nodiscard]] bool IsKeyDown(InputKey key) const;
 
-    [[nodiscard]] const MouseMoveData &GetMouseMoveData() const;
-    [[nodiscard]] MouseMoveData &GetMouseMoveData();
+    [[nodiscard]] const MouseMoveData &MouseMoveData() const;
+    [[nodiscard]] computer_graphics::MouseMoveData &MouseMoveData();
 
-    [[nodiscard]] const OnMouseMove &GetOnMouseMove() const;
-    [[nodiscard]] OnMouseMove &GetOnMouseMove();
+    [[nodiscard]] const OnMouseMove &OnMouseMove() const;
+    [[nodiscard]] computer_graphics::OnMouseMove &OnMouseMove();
 
-    [[nodiscard]] const OnInputKeyUp &GetOnInputKeyUp() const;
-    [[nodiscard]] OnInputKeyUp &GetOnInputKeyUp();
+    [[nodiscard]] const OnInputKeyUp &OnInputKeyUp() const;
+    [[nodiscard]] computer_graphics::OnInputKeyUp &OnInputKeyUp();
 
-    [[nodiscard]] const OnInputKeyDown &GetOnInputKeyDown() const;
-    [[nodiscard]] OnInputKeyDown &GetOnInputKeyDown();
+    [[nodiscard]] const OnInputKeyDown &OnInputKeyDown() const;
+    [[nodiscard]] computer_graphics::OnInputKeyDown &OnInputKeyDown();
 
   private:
     friend class Window;
@@ -52,10 +50,10 @@ class InputDevice {
     void RemovePressedKey(InputKey key);
 
     Window &window_;
-    MouseMoveData mouse_move_data_;
-    OnMouseMove on_mouse_move_;
-    OnInputKeyDown on_input_key_down_;
-    OnInputKeyUp on_input_key_up_;
+    computer_graphics::MouseMoveData mouse_move_data_;
+    computer_graphics::OnMouseMove on_mouse_move_;
+    computer_graphics::OnInputKeyDown on_input_key_down_;
+    computer_graphics::OnInputKeyUp on_input_key_up_;
     std::unordered_set<InputKey> keys_;
 };
 

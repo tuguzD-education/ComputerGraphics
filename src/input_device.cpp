@@ -16,13 +16,13 @@ InputDevice::InputDevice(Window &window) : window_{window}, mouse_move_data_{} {
             .usUsagePage = HID_USAGE_PAGE_GENERIC,
             .usUsage = HID_USAGE_GENERIC_MOUSE,
             .dwFlags = 0,  // adds HID mouse and also ignores legacy mouse messages
-            .hwndTarget = window.GetRawHandle(),
+            .hwndTarget = window.RawHandle(),
         },
         RAWINPUTDEVICE{
             .usUsagePage = HID_USAGE_PAGE_GENERIC,
             .usUsage = HID_USAGE_GENERIC_KEYBOARD,
             .dwFlags = 0,  // adds HID keyboard and also ignores legacy keyboard messages
-            .hwndTarget = window.GetRawHandle(),
+            .hwndTarget = window.RawHandle(),
         },
     };
 
@@ -30,7 +30,7 @@ InputDevice::InputDevice(Window &window) : window_{window}, mouse_move_data_{} {
         raw_input_devices.data(), raw_input_devices.size(),
         sizeof(decltype(raw_input_devices)::value_type)
         )) {
-        std::string message = detail::GetLastError();
+        std::string message = detail::LastError();
         throw std::runtime_error{message};
     }
 
@@ -46,36 +46,36 @@ bool InputDevice::IsKeyDown(InputKey key) const {
     return keys_.count(key) > 0;
 }
 
-auto InputDevice::GetMouseMoveData() const -> const MouseMoveData & {
+const MouseMoveData &InputDevice::MouseMoveData() const {
     return mouse_move_data_;
 }
 
-auto InputDevice::GetMouseMoveData() -> MouseMoveData & {
+MouseMoveData &InputDevice::MouseMoveData() {
     return mouse_move_data_;
 }
 
-auto InputDevice::GetOnMouseMove() const -> const OnMouseMove & {
+const OnMouseMove &InputDevice::OnMouseMove() const {
     return on_mouse_move_;
 }
 
-auto InputDevice::GetOnMouseMove() -> OnMouseMove & {
+OnMouseMove &InputDevice::OnMouseMove() {
     return on_mouse_move_;
 }
 
-auto InputDevice::GetOnInputKeyUp() const -> const OnInputKeyUp & {
+const OnInputKeyUp &InputDevice::OnInputKeyUp() const {
     return on_input_key_up_;
 }
 
-auto InputDevice::GetOnInputKeyUp() -> OnInputKeyUp & {
+OnInputKeyUp &InputDevice::OnInputKeyUp() {
     return on_input_key_up_;
 }
 
-auto InputDevice::GetOnInputKeyDown() const -> const OnInputKeyDown & {
-    return on_input_key_down_;
+const OnInputKeyDown &InputDevice::OnInputKeyDown() const {
+    return on_input_key_up_;
 }
 
-auto InputDevice::GetOnInputKeyDown() -> OnInputKeyDown & {
-    return on_input_key_down_;
+OnInputKeyDown &InputDevice::OnInputKeyDown() {
+    return on_input_key_up_;
 }
 
 void InputDevice::OnRawKeyboard(const RAWKEYBOARD &data) {
@@ -117,7 +117,7 @@ void InputDevice::OnRawMouse(const RAWMOUSE &data) {
 
     POINT point;
     ::GetCursorPos(&point);
-    ::ScreenToClient(window_.GetRawHandle(), &point);
+    ::ScreenToClient(window_.RawHandle(), &point);
 
     mouse_move_data_ = {
         .position = {static_cast<float>(point.x), static_cast<float>(point.y)},

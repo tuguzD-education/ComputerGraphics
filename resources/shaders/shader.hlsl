@@ -1,30 +1,30 @@
 struct VS_IN
 {
-	float4 pos : POSITION0;
-	float4 col : COLOR0;
+	float4 position : POSITION0;
+	float4 color : COLOR0;
 };
 
 struct PS_IN
 {
-	float4 pos : SV_POSITION;
- 	float4 col : COLOR;
+	float4 position : SV_POSITION;
+ 	float4 color : COLOR;
 };
 
-PS_IN VSMain( VS_IN input )
+PS_IN VSMain(VS_IN input)
 {
 	PS_IN output = (PS_IN)0;
 	
-	output.pos = input.pos;
-	output.col = input.col;
+	output.position = input.position;
+	output.color = input.color;
 	
 	return output;
 }
 
 float4 PSMain( PS_IN input ) : SV_Target
 {
-	float4 col = input.col;
+	float4 color = input.color;
 #ifdef TEST
-	if (input.pos.x > 400) col = TCOLOR;
+	if (input.position.x > 400) color = TCOLOR;
 #endif
-	return col;
+	return color;
 }

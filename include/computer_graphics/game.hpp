@@ -4,14 +4,11 @@
 #define GAME_HPP_INCLUDED
 
 #include <d3d11.h>
-#include <wrl/client.h>
 
 #include <memory>
 #include <vector>
 
-#include "component.hpp"
 #include "detail/d3d_ptr.hpp"
-#include "game.fwd"
 #include "timer.hpp"
 #include "window.hpp"
 
@@ -19,12 +16,19 @@ namespace computer_graphics {
 
 class Game {
   public:
-    explicit Game(Window &window);
+    explicit Game(Window &window, InputDevice &input_device);
+    ~Game();
 
     [[nodiscard]] const Timer::Duration &TimePerUpdate() const;
-    [[nodiscard]] Timer::Duration &TimePerUpdate();
+    void TimePerUpdate(Timer::Duration time_per_update);
+
+    [[nodiscard]] const math::Color &ClearColor() const;
+    [[nodiscard]] math::Color &ClearColor();
 
     [[nodiscard]] bool IsRunning() const;
+
+    template <typename T, typename... Args>
+    void AddComponent(Args &&...args);
 
     void Run();
     void Exit();
@@ -42,10 +46,13 @@ class Game {
     Timer timer_;
     Timer::Duration time_per_update_;
 
-    Window &window_;
-    LONG initial_width_;
-    LONG initial_height_;
+    InputDevice &input_device_;
 
+    Window &window_;
+    UINT target_width_;
+    UINT target_height_;
+
+    math::Color clear_color_;
     bool should_exit_;
     bool is_running_;
 
@@ -58,5 +65,7 @@ class Game {
 };
 
 }  // namespace computer_graphics
+
+#include "game.inl"
 
 #endif  // GAME_HPP_INCLUDED

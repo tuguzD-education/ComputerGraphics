@@ -3,8 +3,7 @@
 #ifndef TRIANGLECOMPONENT_HPP_INCLUDED
 #define TRIANGLECOMPONENT_HPP_INCLUDED
 
-#include <directxmath.h>
-#include <wrl/client.h>
+#include <VertexTypes.h>
 
 #include <span>
 
@@ -15,10 +14,7 @@ namespace computer_graphics {
 
 class TriangleComponent : public Component {
   public:
-    struct Vertex {
-        DirectX::XMFLOAT4 position;
-        DirectX::XMFLOAT4 color;
-    };
+    using Vertex = DirectX::VertexPositionColor;
     using Index = int;
 
     explicit TriangleComponent(Game &game, std::span<Vertex> vertices, std::span<Index> indices);

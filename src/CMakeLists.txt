@@ -4,7 +4,9 @@ set(HEADER_LIST
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/detail/check_result.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/detail/check_result.inl
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/detail/d3d_ptr.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/math.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/game.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/game.inl
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/timer.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/window.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/input_key.hpp
@@ -29,7 +31,9 @@ find_package(directxtk CONFIG REQUIRED)
 add_library(computer_graphics ${SOURCE_LIST} ${HEADER_LIST})
 target_include_directories(computer_graphics PUBLIC ${PROJECT_SOURCE_DIR}/include)
 target_compile_features(computer_graphics PUBLIC cxx_std_20)
-target_link_libraries(computer_graphics PRIVATE
+target_link_libraries(computer_graphics PUBLIC
         d3d11.lib dxgi.lib d3dcompiler.lib dxguid.lib
         Microsoft::DirectXTK
 )
+
+message(STATUS "Using toolchain file: ${CMAKE_TOOLCHAIN_FILE}")

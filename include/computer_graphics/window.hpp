@@ -5,35 +5,31 @@
 
 #include <windows.h>
 
-#include <string_view>
+#include <string>
+
+#include "math.hpp"
 
 namespace computer_graphics {
 
 class Window {
   public:
-    struct Dimensions {
-        LONG width;
-        LONG height;
-    };
-
     explicit Window(std::string_view name, LONG width, LONG height, HINSTANCE instance_handle = nullptr);
     ~Window();
 
     bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK);
 
-    [[nodiscard]] HWND GetRawHandle() const;
-    [[nodiscard]] HINSTANCE GetRawInstanceHandle() const;
+    [[nodiscard]] HWND RawHandle() const;
+    [[nodiscard]] HINSTANCE RawInstanceHandle() const;
 
-    [[nodiscard]] RECT GetRect() const;
-    [[nodiscard]] Dimensions GetDimensions() const;
-
-    [[nodiscard]] RECT GetClientRect() const;
-    [[nodiscard]] Dimensions GetClientDimensions() const;
+    [[nodiscard]] math::Rectangle Dimensions() const;
+    [[nodiscard]] math::Rectangle ClientDimensions() const;
 
     [[nodiscard]] bool IsDestroyed() const;
     [[nodiscard]] bool IsFocused() const;
 
-    bool SetTitle(std::string_view title);
+    [[nodiscard]] std::string Title() const;
+    bool Title(std::string_view title);
+
     void ProcessQueueMessages();
     void Destroy();
 

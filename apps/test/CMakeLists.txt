@@ -1,3 +1,7 @@
+set(HEADER_LIST
+        clear_screen_component.hpp
+        window_title_component.hpp
+        square_component.hpp)
 set(SOURCE_LIST
         test.cpp)
 

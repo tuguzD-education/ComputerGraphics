@@ -3,6 +3,8 @@
 #include <array>
 #include <format>
 
+#include <SimpleMath.h>
+
 #include "computer_graphics/detail/check_result.hpp"
 #include "computer_graphics/triangle_component.hpp"
 
@@ -10,45 +12,35 @@ namespace computer_graphics {
 
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
-Game::Game(Window &window) : window_{window}, time_per_update_{default_time_per_update}, should_exit_{}, is_running_{} {
-    auto [width, height] = window.GetClientDimensions();
-    initial_width_ = width;
-    initial_height_ = height;
-
+Game::Game(Window &window, InputDevice &input_device)
+    : window_{window},
+      input_device_{input_device},
+      time_per_update_{default_time_per_update},
+      target_width_{},
+      target_height_{},
+      should_exit_{},
+      is_running_{} {
     InitializeDevice();
     InitializeSwapChain(window);
     InitializeRenderTargetView();
-
-    std::array vertices{
-        TriangleComponent::Vertex{
-            .position = {0.5f, 0.5f, 0.5f, 1.0f},
-            .color = {1.0f, 0.0f, 0.0f, 1.0f},
-        },
-        TriangleComponent::Vertex{
-            .position = {-0.5f, -0.5f, 0.5f, 1.0f},
-            .color = {0.0f, 0.0f, 1.0f, 1.0f},
-        },
-        TriangleComponent::Vertex{
-            .position = {0.5f, -0.5f, 0.5f, 1.0f},
-            .color = {0.0f, 1.0f, 0.0f, 1.0f},
-        },
-        TriangleComponent::Vertex{
-            .position = {-0.5f, 0.5f, 0.5f, 1.0f},
-            .color = {1.0f, 1.0f, 1.0f, 1.0f},
-        },
-    };
-
-    std::array indices{0, 1, 2, 1, 0, 3};
-    auto triangle_component = std::make_unique<TriangleComponent>(*this, vertices, indices);
-    components_.push_back(std::move(triangle_component));
 }
+
+Game::~Game() = default;
 
 const Timer::Duration &Game::TimePerUpdate() const {
     return time_per_update_;
 }
 
-Timer::Duration &Game::TimePerUpdate() {
-    return time_per_update_;
+void Game::TimePerUpdate(Timer::Duration time_per_update) {
+    time_per_update_ = time_per_update;
+}
+
+const math::Color &Game::ClearColor() const {
+    return clear_color_;
+}
+
+math::Color &Game::ClearColor() {
+    return clear_color_;
 }
 
 bool Game::IsRunning() const {
@@ -65,14 +57,6 @@ void Game::Run() {
     while (!should_exit_) {
         window_.ProcessQueueMessages();
         if (window_.IsDestroyed()) break;
-
-        if (float fps = timer_.FramesPerSecond(); fps > 0) {
-            static std::string text;
-
-            std::format_to(std::back_inserter(text), "FPS: {}", fps);
-            window_.SetTitle(text);
-            text.clear();
-        }
 
         timer_.Tick();
         lag += timer_.CurrentTickTimePoint() - timer_.PreviousTickTimePoint();
@@ -94,48 +78,15 @@ void Game::Exit() {
     should_exit_ = true;
 }
 
-void Game::Update(float delta_time) {
-    for (const auto &component : components_) {
-        component->Update(delta_time);
-    }
-}
-
-void Game::Draw() {
-    device_context_->ClearState();
-
-    D3D11_VIEWPORT viewport{
-        .TopLeftX = 0,
-        .TopLeftY = 0,
-        .Width = static_cast<FLOAT>(initial_width_),
-        .Height = static_cast<FLOAT>(initial_height_),
-        .MinDepth = 0,
-        .MaxDepth = 1.0f,
-    };
-    std::array viewports{viewport};
-    device_context_->RSSetViewports(viewports.size(), viewports.data());
-
-    device_context_->OMSetRenderTargets(1, render_target_view_.GetAddressOf(), nullptr);
-
-    float start_time = timer_.StartTime();
-    float red = start_time - std::floor(start_time);
-    DirectX::XMFLOAT4 color{red, 0.1f, 0.1f, 1.0f};
-    device_context_->ClearRenderTargetView(render_target_view_.Get(), &color.x);
-
-    for (const auto &component : components_) {
-        component->Draw();
-    }
-    device_context_->OMSetRenderTargets(0, nullptr, nullptr);
-    swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
-}
-
 void Game::InitializeDevice() {
     std::array feature_level{
         D3D_FEATURE_LEVEL_11_1,
     };
-    HRESULT result = D3D11CreateDevice(
-        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
-        feature_level.data(), feature_level.size(),
-        D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
+    HRESULT result =
+        D3D11CreateDevice(
+            nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
+            feature_level.data(), feature_level.size(),
+            D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
     detail::CheckResult(result, "Failed to create device");
 }
 
@@ -157,8 +108,6 @@ void Game::InitializeSwapChain(const Window &window) {
     DXGI_SWAP_CHAIN_DESC swap_chain_desc = {
         .BufferDesc =
             {
-                .Width = static_cast<UINT>(initial_width_),
-                .Height = static_cast<UINT>(initial_height_),
                 .RefreshRate =
                     {
                         .Numerator = 60,
@@ -175,7 +124,7 @@ void Game::InitializeSwapChain(const Window &window) {
             },
         .BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT,
         .BufferCount = 2,
-        .OutputWindow = window.GetRawHandle(),
+        .OutputWindow = window.RawHandle(),
         .Windowed = true,
         .SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD,
         .Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH,
@@ -186,13 +135,61 @@ void Game::InitializeSwapChain(const Window &window) {
 
 void Game::InitializeRenderTargetView() {
     HRESULT result;
+    detail::D3DPtr<ID3D11Resource> resource;
 
-    detail::D3DPtr<ID3D11Texture2D> back_buffer;
-    result = swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, &back_buffer);
-    detail::CheckResult(result, "Failed to create back buffer");
+    if (swap_chain_) {
+        detail::D3DPtr<ID3D11Texture2D> back_buffer;
+        result = swap_chain_->GetBuffer(0, IID_ID3D11Texture2D, &back_buffer);
+        detail::CheckResult(result, "Failed to create back buffer");
 
-    result = device_->CreateRenderTargetView(back_buffer.Get(), nullptr, &render_target_view_);
+        D3D11_TEXTURE2D_DESC back_buffer_desc;
+        back_buffer->GetDesc(&back_buffer_desc);
+        target_width_ = back_buffer_desc.Width;
+        target_height_ = back_buffer_desc.Height;
+
+        resource = back_buffer;
+    } else {
+        throw std::runtime_error{"Failed to find any source to create render target from"};
+    }
+
+    result = device_->CreateRenderTargetView(resource.Get(), nullptr, &render_target_view_);
     detail::CheckResult(result, "Failed to create render target view");
+}
+
+void Game::Update(float delta_time) {
+    for (const auto &component : components_) {
+        component->Update(delta_time);
+    }
+}
+
+void Game::Draw() {
+    device_context_->ClearState();
+
+    D3D11_VIEWPORT viewport{
+        .TopLeftX = 0.0f,
+        .TopLeftY = 0.0f,
+        .Width = static_cast<FLOAT>(target_width_),
+        .Height = static_cast<FLOAT>(target_height_),
+        .MinDepth = 0.0f,
+        .MaxDepth = 1.0f,
+    };
+    std::array viewports{viewport};
+    device_context_->RSSetViewports(viewports.size(), viewports.data());
+
+    std::array render_targets{render_target_view_.Get()};
+    device_context_->OMSetRenderTargets(
+        render_targets.size(), render_targets.data(), nullptr);
+
+    device_context_->ClearRenderTargetView(render_target_view_.Get(), clear_color_);
+
+    for (const auto &component : components_) {
+        component->Draw();
+    }
+    std::array<ID3D11RenderTargetView *, 0> no_render_targets;
+    device_context_->OMSetRenderTargets(
+        no_render_targets.size(), no_render_targets.data(), nullptr);
+
+    swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
 }
 
 }  // namespace computer_graphics
