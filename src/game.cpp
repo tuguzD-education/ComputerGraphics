@@ -8,7 +8,9 @@
 
 namespace computer_graphics {
 
-Game::Game(Window &window) : window_{window} {
+constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
+
+Game::Game(Window &window) : window_{window}, time_per_update_{default_time_per_update}, should_exit_{}, is_running_{} {
     auto [width, height] = window.GetClientDimensions();
     initial_width_ = width;
     initial_height_ = height;
@@ -41,13 +43,28 @@ Game::Game(Window &window) : window_{window} {
     components_.push_back(std::move(triangle_component));
 }
 
+const Timer::Duration &Game::TimePerUpdate() const {
+    return time_per_update_;
+}
+
+Timer::Duration &Game::TimePerUpdate() {
+    return time_per_update_;
+}
+
+bool Game::IsRunning() const {
+    return is_running_;
+}
+
 void Game::Run() {
-    while (true) {
+    if (is_running_) {
+        return;
+    }
+    is_running_ = true;
+
+    auto lag = Timer::Duration::zero();
+    while (!should_exit_) {
         window_.ProcessQueueMessages();
         if (window_.IsDestroyed()) break;
-
-        timer_.Tick();
-        Draw();
 
         if (float fps = timer_.FramesPerSecond(); fps > 0) {
             static std::string text;
@@ -56,11 +73,31 @@ void Game::Run() {
             window_.SetTitle(text);
             text.clear();
         }
+
+        timer_.Tick();
+        lag += timer_.CurrentTickTimePoint() - timer_.PreviousTickTimePoint();
+
+        while (lag >= time_per_update_) {
+            float delta_time = Timer::SecondsFrom(time_per_update_);
+            Update(delta_time);
+            lag -= time_per_update_;
+        }
+
+        Draw();
     }
+
+    is_running_ = false;
+    should_exit_ = false;
 }
 
 void Game::Exit() {
-    window_.Destroy();
+    should_exit_ = true;
+}
+
+void Game::Update(float delta_time) {
+    for (const auto &component : components_) {
+        component->Update(delta_time);
+    }
 }
 
 void Game::Draw() {

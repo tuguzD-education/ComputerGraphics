@@ -17,6 +17,7 @@ class Window {
     };
 
     explicit Window(std::string_view name, LONG width, LONG height, HINSTANCE instance_handle = nullptr);
+    ~Window();
 
     bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK);
 
@@ -30,6 +31,7 @@ class Window {
     [[nodiscard]] Dimensions GetClientDimensions() const;
 
     [[nodiscard]] bool IsDestroyed() const;
+    [[nodiscard]] bool IsFocused() const;
 
     bool SetTitle(std::string_view title);
     void ProcessQueueMessages();

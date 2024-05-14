@@ -1,9 +1,10 @@
 #include "computer_graphics/window.hpp"
 
-#include <computer_graphics/detail/string_api_set.hpp>
-#include <computer_graphics/input_device.hpp>
 #include <stdexcept>
 #include <vector>
+
+#include "computer_graphics/detail/string_api_set.hpp"
+#include "computer_graphics/input_device.hpp"
 
 namespace computer_graphics {
 
@@ -43,6 +44,7 @@ Window::Window(std::string_view name, LONG width, LONG height, HINSTANCE instanc
         (GetSystemMetrics(SM_CXSCREEN) - width) / 2, (GetSystemMetrics(SM_CYSCREEN) - height) / 2,
         rect.right - rect.left, rect.bottom - rect.top,
         nullptr, nullptr, instance_handle, this);
+
     ShowWindow(handle_, SW_SHOW);
     SetForegroundWindow(handle_);
     SetFocus(handle_);
@@ -51,6 +53,10 @@ Window::Window(std::string_view name, LONG width, LONG height, HINSTANCE instanc
 
 bool Window::ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type) {
     return MessageBox(handle_, text, caption, type);
+}
+
+Window::~Window() {
+    Destroy();
 }
 
 HWND Window::GetRawHandle() const {
@@ -93,6 +99,10 @@ bool Window::IsDestroyed() const {
     return is_destroyed_;
 }
 
+bool Window::IsFocused() const {
+    return handle_ == GetFocus();
+}
+
 bool Window::SetTitle(std::string_view title) {
     std::basic_string<TCHAR> t_title = detail::MultiByteToTChar(CP_UTF8, 0, title);
     LPCTSTR c_title = t_title.c_str();
@@ -133,20 +143,27 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPA
             if (input_device == nullptr) {
                 break;
             }
+            if (!window->IsFocused()) {
+                break;
+            }
 
             static std::vector<BYTE> lpb;
 
             UINT size;
             auto h_raw_input = (HRAWINPUT)l_param;
-            UINT result = ::GetRawInputData(h_raw_input, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER));
+            UINT result = ::GetRawInputData(
+                h_raw_input, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER));
             if (result) {
                 throw std::runtime_error{"Failed to obtain raw input"};
             }
 
             lpb.reserve(size);
-            result = ::GetRawInputData(h_raw_input, RID_INPUT, lpb.data(), &size, sizeof(RAWINPUTHEADER));
+            result = ::GetRawInputData(
+                h_raw_input, RID_INPUT, lpb.data(), &size, sizeof(RAWINPUTHEADER));
             if (result != size) {
-                throw std::runtime_error{"Failed to obtain raw input: GetRawInputData does not return correct size"};
+                throw std::runtime_error{
+                    "Failed to obtain raw input: GetRawInputData does not return correct size"
+                };
             }
 
             auto raw_input = (RAWINPUT *)lpb.data();

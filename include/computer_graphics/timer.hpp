@@ -23,14 +23,19 @@ class Timer {
     [[nodiscard]] float DeltaTime() const;
 
     [[nodiscard]] float FramesPerSecond() const;
+    [[nodiscard]] float ImmediateFramesPerSecond() const;
+
+    [[nodiscard]] TimePoint StartTimePoint() const;
+    [[nodiscard]] TimePoint CurrentTickTimePoint() const;
+    [[nodiscard]] TimePoint PreviousTickTimePoint() const;
+
+    [[nodiscard]] float SecondsFromCurrent(TimePoint time_point) const;
+    [[nodiscard]] static float SecondsFrom(Duration duration);
 
   private:
     using FrameCount = std::uint16_t;
 
     explicit Timer(TimePoint time_point) noexcept;
-
-    [[nodiscard]] float SecondsFromCurrent(TimePoint time_point) const;
-    [[nodiscard]] static float SecondsFrom(Duration duration);
 
     TimePoint start_;
     TimePoint current_;

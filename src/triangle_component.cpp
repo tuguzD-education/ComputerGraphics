@@ -13,18 +13,21 @@ namespace computer_graphics {
 
 namespace detail {
 
-D3DPtr<ID3DBlob> CompileFromFile(const char *path, const D3D_SHADER_MACRO *defines, ID3DInclude *include,
-                                 const char *entrypoint, const char *target, UINT flags_1, UINT flags_2) {
+D3DPtr<ID3DBlob> CompileFromFile(
+    const char *path, const D3D_SHADER_MACRO *defines, ID3DInclude *include,
+    const char *entrypoint, const char *target, UINT flags_1, UINT flags_2) {
+
     D3DPtr<ID3DBlob> shader;
     D3DPtr<ID3DBlob> error_messages;
 
     std::wstring w_path = MultiByteToWideChar(CP_UTF8, 0, path);
-    HRESULT result = D3DCompileFromFile(w_path.c_str(), defines, include, entrypoint, target, flags_1, flags_2, &shader,
-                                        &error_messages);
+    HRESULT result = D3DCompileFromFile(
+        w_path.c_str(), defines, include, entrypoint, target,
+        flags_1, flags_2, &shader, &error_messages);
     detail::CheckResult(result, [&] {
         const char *message =
             error_messages ? static_cast<const char *>(error_messages->GetBufferPointer()) : "file is missing";
-        return std::format("Failed to compile vertex shader file '{}': {}", path, message);
+        return std::format("Failed to compile vertex shader file '{}':\n{}", path, message);
     });
 
     return shader;
@@ -49,17 +52,22 @@ void TriangleComponent::Draw() {
 
     std::array vertex_buffers = {vertex_buffer_.Get()};
     std::array<UINT, vertex_buffers.size()> strides{sizeof(Vertex)};
-    std::array<UINT, vertex_buffers.size()> offsets{0u};
+    std::array<UINT, vertex_buffers.size()> offsets{0};
 
     device_context->RSSetState(rasterizer_state_.Get());
     device_context->IASetInputLayout(input_layout_.Get());
     device_context->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     device_context->IASetIndexBuffer(index_buffer_.Get(), DXGI_FORMAT_R32_UINT, 0);
-    device_context->IASetVertexBuffers(0, vertex_buffers.size(), vertex_buffers.data(), strides.data(), offsets.data());
+    device_context->IASetVertexBuffers(
+        0, vertex_buffers.size(), vertex_buffers.data(),
+        strides.data(), offsets.data());
     device_context->VSSetShader(vertex_shader_.Get(), nullptr, 0);
     device_context->PSSetShader(index_shader_.Get(), nullptr, 0);
 
-    device_context->DrawIndexed(6, 0, 0);
+    D3D11_BUFFER_DESC index_buffer_desc;
+    index_buffer_->GetDesc(&index_buffer_desc);
+    UINT index_count = index_buffer_desc.ByteWidth / sizeof(Index);
+    device_context->DrawIndexed(index_count, 0, 0);
 }
 
 void TriangleComponent::InitializeVertexShader() {
@@ -67,8 +75,9 @@ void TriangleComponent::InitializeVertexShader() {
         detail::CompileFromFile("resources/shaders/shader.hlsl", nullptr /*macros*/, nullptr /*include*/, "VSMain",
                                 "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
-    HRESULT result = GetDevice()->CreateVertexShader(vertex_byte_code_->GetBufferPointer(),
-                                                     vertex_byte_code_->GetBufferSize(), nullptr, &vertex_shader_);
+    HRESULT result = GetDevice()->CreateVertexShader(
+        vertex_byte_code_->GetBufferPointer(), vertex_byte_code_->GetBufferSize(),
+        nullptr, &vertex_shader_);
     detail::CheckResult(result, "Failed to create vertex shader from byte code");
 }
 
@@ -79,11 +88,13 @@ void TriangleComponent::InitializeIndexShader() {
         D3D_SHADER_MACRO{.Name = nullptr, .Definition = nullptr},
     };
     index_byte_code_ =
-        detail::CompileFromFile("resources/shaders/shader.hlsl", shader_macros.data() /*macros*/, nullptr /*include*/,
-                                "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
+        detail::CompileFromFile(
+            "resources/shaders/shader.hlsl", shader_macros.data() /*macros*/, nullptr /*include*/,
+            "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
-    HRESULT result = GetDevice()->CreatePixelShader(index_byte_code_->GetBufferPointer(),
-                                                    index_byte_code_->GetBufferSize(), nullptr, &index_shader_);
+    HRESULT result = GetDevice()->CreatePixelShader(
+        index_byte_code_->GetBufferPointer(), index_byte_code_->GetBufferSize(),
+        nullptr, &index_shader_);
     detail::CheckResult(result, "Failed to create index shader from byte code");
 }
 
@@ -109,9 +120,10 @@ void TriangleComponent::InitializeInputLayout() {
         },
     };
 
-    HRESULT result = GetDevice()->CreateInputLayout(input_elements.data(), input_elements.size(),
-                                                    vertex_byte_code_->GetBufferPointer(),
-                                                    vertex_byte_code_->GetBufferSize(), &input_layout_);
+    HRESULT result = GetDevice()->CreateInputLayout(
+        input_elements.data(), input_elements.size(),
+        vertex_byte_code_->GetBufferPointer(),
+        vertex_byte_code_->GetBufferSize(), &input_layout_);
     detail::CheckResult(result, "Failed to create input layout");
 }
 

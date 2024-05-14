@@ -45,6 +45,22 @@ float Timer::FramesPerSecond() const {
     return frames_per_second_;
 }
 
+float Timer::ImmediateFramesPerSecond() const {
+    return 1.0f / DeltaTime();
+}
+
+auto Timer::StartTimePoint() const -> TimePoint {
+    return start_;
+}
+
+auto Timer::CurrentTickTimePoint() const -> TimePoint {
+    return current_;
+}
+
+auto Timer::PreviousTickTimePoint() const -> TimePoint {
+    return previous_;
+}
+
 float Timer::SecondsFromCurrent(TimePoint time_point) const {
     return SecondsFrom(current_ - time_point);
 }
