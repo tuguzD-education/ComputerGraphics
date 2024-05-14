@@ -16,10 +16,7 @@ class Window {
         LONG height;
     };
 
-    explicit Window(
-        std::string_view name, LONG width,
-        LONG height, HINSTANCE instance_handle = nullptr
-    );
+    explicit Window(std::string_view name, LONG width, LONG height, HINSTANCE instance_handle = nullptr);
 
     bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK);
 
@@ -41,9 +38,7 @@ class Window {
   private:
     friend class InputDevice;
 
-    static LRESULT CALLBACK WndProc(
-        HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param
-    );
+    static LRESULT CALLBACK WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param);
 
     HWND handle_;
     InputDevice *input_device_;

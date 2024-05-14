@@ -7,18 +7,18 @@
 
 #include <unordered_set>
 
-#include "window.hpp"
-#include "input_key.hpp"
 #include "delegates.hpp"
+#include "input_key.hpp"
+#include "window.hpp"
 
 namespace computer_graphics {
 
 class InputDevice {
   public:
     struct MouseMoveData {
-      DirectX::XMFLOAT2 position;
-      DirectX::XMFLOAT2 offset;
-      int wheel_delta;
+        DirectX::XMFLOAT2 position;
+        DirectX::XMFLOAT2 offset;
+        int wheel_delta;
     };
 
     DECLARE_MULTICAST_DELEGATE(OnMouseMove, const MouseMoveData &);
@@ -59,6 +59,6 @@ class InputDevice {
     std::unordered_set<InputKey> keys_;
 };
 
-}
+}  // namespace computer_graphics
 
-#endif //INPUT_DEVICE_HPP_INCLUDED
+#endif  // INPUT_DEVICE_HPP_INCLUDED

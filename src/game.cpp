@@ -42,26 +42,25 @@ Game::Game(Window &window) : window_{window} {
 }
 
 void Game::Run() {
-  while (true) {
-    window_.ProcessQueueMessages();
-    if (window_.IsDestroyed())
-      break;
+    while (true) {
+        window_.ProcessQueueMessages();
+        if (window_.IsDestroyed()) break;
 
-    timer_.Tick();
-    Draw();
+        timer_.Tick();
+        Draw();
 
-    if (float fps = timer_.FramesPerSecond(); fps > 0) {
-      static std::string text;
+        if (float fps = timer_.FramesPerSecond(); fps > 0) {
+            static std::string text;
 
-      std::format_to(std::back_inserter(text), "FPS: {}", fps);
-      window_.SetTitle(text);
-      text.clear();
+            std::format_to(std::back_inserter(text), "FPS: {}", fps);
+            window_.SetTitle(text);
+            text.clear();
+        }
     }
-  }
 }
 
 void Game::Exit() {
-  window_.Destroy();
+    window_.Destroy();
 }
 
 void Game::Draw() {
@@ -96,9 +95,10 @@ void Game::InitializeDevice() {
     std::array feature_level{
         D3D_FEATURE_LEVEL_11_1,
     };
-    HRESULT result =
-        D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, feature_level.data(),
-                          feature_level.size(), D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
+    HRESULT result = D3D11CreateDevice(
+        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
+        feature_level.data(), feature_level.size(),
+        D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
     detail::CheckResult(result, "Failed to create device");
 }
 
