@@ -11,29 +11,39 @@ class SquareComponent : public computer_graphics::TriangleComponent {
   public:
     explicit SquareComponent(computer_graphics::Game &game);
 
+    void Update(float delta_time) override;
+
   private:
     static std::array<Vertex, 4> vertices;
     static std::array<Index, 6> indices;
 };
 
+void SquareComponent::Update(float delta_time) {
+    auto &position = Position();
+    position.x += 0.5f * delta_time;
+    if (position.x > 1.5f) {
+        position.x -= 3.0f;
+    }
+}
+
 SquareComponent::SquareComponent(computer_graphics::Game &game) : TriangleComponent{game, vertices, indices} {}
 
 std::array<SquareComponent::Vertex, 4> SquareComponent::vertices{
-    computer_graphics::TriangleComponent::Vertex{
-        {0.5f, 0.5f, 0.5f, 1.0f},
-        {1.0f, 0.0f, 0.0f, 1.0f},
+    Vertex{
+        computer_graphics::math::Vector3{0.5f, 0.5f, 0.0f},
+        computer_graphics::math::Color{1.0f, 0.0f, 0.0f, 1.0f},
     },
-    computer_graphics::TriangleComponent::Vertex{
-        {-0.5f, -0.5f, 0.5f, 1.0f},
-        {0.0f, 0.0f, 1.0f, 1.0f},
+    Vertex{
+        computer_graphics::math::Vector3{-0.5f, -0.5f, 0.0f},
+        computer_graphics::math::Color{0.0f, 0.0f, 1.0f, 1.0f},
     },
-    computer_graphics::TriangleComponent::Vertex{
-        {0.5f, -0.5f, 0.5f, 1.0f},
-        {0.0f, 1.0f, 0.0f, 1.0f},
+    Vertex{
+        computer_graphics::math::Vector3{0.5f, -0.5f, 0.0f},
+        computer_graphics::math::Color{0.0f, 1.0f, 0.0f, 1.0f},
     },
-    computer_graphics::TriangleComponent::Vertex{
-        {-0.5f, 0.5f, 0.5f, 1.0f},
-        {1.0f, 1.0f, 1.0f, 1.0f},
+    Vertex{
+        computer_graphics::math::Vector3{-0.5f, 0.5f, 0.0f},
+        computer_graphics::math::Color{1.0f, 1.0f, 1.0f, 1.0f},
     },
 };
 

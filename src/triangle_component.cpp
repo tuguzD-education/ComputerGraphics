@@ -35,14 +35,24 @@ D3DPtr<ID3DBlob> CompileFromFile(
 
 }  // namespace detail
 
-TriangleComponent::TriangleComponent(Game &game, std::span<Vertex> vertices, std::span<Index> indices)
-    : Component{game} {
+TriangleComponent::TriangleComponent(
+    Game &game, std::span<Vertex> vertices, std::span<Index> indices, math::Vector3 position)
+    : Component{game}, position_{position} {
     InitializeVertexShader();
     InitializeIndexShader();
     InitializeInputLayout();
     InitializeRasterizerState();
     InitializeVertexBuffer(vertices);
     InitializeIndexBuffer(indices);
+    InitializeConstantBuffer(position);
+}
+
+const math::Vector3 &TriangleComponent::Position() const {
+    return position_;
+}
+
+math::Vector3 &TriangleComponent::Position() {
+    return position_;
 }
 
 void TriangleComponent::Update(float delta_time) {}
@@ -64,6 +74,13 @@ void TriangleComponent::Draw() {
     device_context->VSSetShader(vertex_shader_.Get(), nullptr, 0);
     device_context->PSSetShader(index_shader_.Get(), nullptr, 0);
 
+    D3D11_MAPPED_SUBRESOURCE subresource{};
+    device_context->Map(constant_buffer_.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &subresource);
+    std::memcpy(subresource.pData, &position_, sizeof(position_));
+    device_context->Unmap(constant_buffer_.Get(), 0);
+
+    device_context->VSSetConstantBuffers(0, 1, constant_buffer_.GetAddressOf());
+
     D3D11_BUFFER_DESC index_buffer_desc;
     index_buffer_->GetDesc(&index_buffer_desc);
     UINT index_count = index_buffer_desc.ByteWidth / sizeof(Index);
@@ -72,8 +89,9 @@ void TriangleComponent::Draw() {
 
 void TriangleComponent::InitializeVertexShader() {
     vertex_byte_code_ =
-        detail::CompileFromFile("resources/shaders/shader.hlsl", nullptr /*macros*/, nullptr /*include*/, "VSMain",
-                                "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
+        detail::CompileFromFile(
+            "resources/shaders/shader.hlsl", nullptr /*macros*/, nullptr /*include*/,
+            "VSMain", "vs_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
     HRESULT result = Device()->CreateVertexShader(
         vertex_byte_code_->GetBufferPointer(), vertex_byte_code_->GetBufferSize(),
@@ -173,6 +191,25 @@ void TriangleComponent::InitializeIndexBuffer(std::span<Index> indices) {
 
     HRESULT result = Device()->CreateBuffer(&buffer_desc, &initial_data, &index_buffer_);
     detail::CheckResult(result, "Failed to create index buffer");
+}
+
+void TriangleComponent::InitializeConstantBuffer(math::Vector3 position) {
+    D3D11_BUFFER_DESC buffer_desc{
+        .ByteWidth = ((sizeof(position) - 1) | 15) + 1,
+        .Usage = D3D11_USAGE_DYNAMIC,
+        .BindFlags = D3D11_BIND_CONSTANT_BUFFER,
+        .CPUAccessFlags = D3D11_CPU_ACCESS_WRITE,
+        .MiscFlags = 0,
+        .StructureByteStride = 0,
+    };
+    D3D11_SUBRESOURCE_DATA initial_data{
+        .pSysMem = &position,
+        .SysMemPitch = 0,
+        .SysMemSlicePitch = 0,
+    };
+
+    HRESULT result = Device()->CreateBuffer(&buffer_desc, &initial_data, &constant_buffer_);
+    detail::CheckResult(result, "Failed to create constant buffer");
 }
 
 }  // namespace computer_graphics
