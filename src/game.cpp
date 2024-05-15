@@ -1,9 +1,9 @@
 #include "computer_graphics/game.hpp"
 
+#include <SimpleMath.h>
+
 #include <array>
 #include <format>
-
-#include <SimpleMath.h>
 
 #include "computer_graphics/detail/check_result.hpp"
 #include "computer_graphics/triangle_component.hpp"
@@ -12,7 +12,7 @@ namespace computer_graphics {
 
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
-Game::Game(Window &window, InputDevice &input_device)
+Game::Game(class Window &window, InputDevice &input_device)
     : window_{window},
       input_device_{input_device},
       time_per_update_{default_time_per_update},
@@ -41,6 +41,22 @@ const math::Color &Game::ClearColor() const {
 
 math::Color &Game::ClearColor() {
     return clear_color_;
+}
+
+const Window *Game::Window() const {
+    return &window_;
+}
+
+Window *Game::Window() {
+    return &window_;
+}
+
+const Timer &Game::Timer() const {
+    return timer_;
+}
+
+Timer &Game::Timer() {
+    return timer_;
 }
 
 bool Game::IsRunning() const {
@@ -75,7 +91,7 @@ void Game::Run() {
             lag -= time_per_update_;
         }
 
-        Draw();
+        DrawInternal();
     }
 
     is_running_ = false;
@@ -91,14 +107,12 @@ void Game::InitializeDevice() {
         D3D_FEATURE_LEVEL_11_1,
     };
     HRESULT result =
-        D3D11CreateDevice(
-            nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
-            feature_level.data(), feature_level.size(),
-            D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
+        D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, feature_level.data(),
+                          feature_level.size(), D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
     detail::CheckResult(result, "Failed to create device");
 }
 
-void Game::InitializeSwapChain(const Window &window) {
+void Game::InitializeSwapChain(const class Window &window) {
     HRESULT result;
 
     detail::D3DPtr<IDXGIDevice> dxgi_device;
@@ -164,16 +178,22 @@ void Game::InitializeRenderTargetView() {
     detail::CheckResult(result, "Failed to create render target view");
 }
 
-void Game::Update(float delta_time) {
+void Game::Update(const float delta_time) {
     for (const auto &component : components_) {
         component->Update(delta_time);
     }
 }
 
 void Game::Draw() {
+    for (const auto &component : components_) {
+        component->Draw();
+    }
+}
+
+void Game::DrawInternal() {
     device_context_->ClearState();
 
-    D3D11_VIEWPORT viewport{
+    const D3D11_VIEWPORT viewport{
         .TopLeftX = 0.0f,
         .TopLeftY = 0.0f,
         .Width = static_cast<FLOAT>(target_width_),
@@ -181,23 +201,21 @@ void Game::Draw() {
         .MinDepth = 0.0f,
         .MaxDepth = 1.0f,
     };
-    std::array viewports{viewport};
+    const std::array viewports{viewport};
     device_context_->RSSetViewports(viewports.size(), viewports.data());
 
-    std::array render_targets{render_target_view_.Get()};
-    device_context_->OMSetRenderTargets(
-        render_targets.size(), render_targets.data(), nullptr);
+    const std::array render_targets{render_target_view_.Get()};
+    device_context_->OMSetRenderTargets(render_targets.size(), render_targets.data(), nullptr);
 
     device_context_->ClearRenderTargetView(render_target_view_.Get(), clear_color_);
 
-    for (const auto &component : components_) {
-        component->Draw();
-    }
-    std::array<ID3D11RenderTargetView *, 0> no_render_targets;
-    device_context_->OMSetRenderTargets(
-        no_render_targets.size(), no_render_targets.data(), nullptr);
+    Draw();
 
-    swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
+    constexpr std::array<ID3D11RenderTargetView *, 0> no_render_targets{};
+    device_context_->OMSetRenderTargets(no_render_targets.size(), no_render_targets.data(), nullptr);
+
+    const HRESULT result = swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
+    detail::CheckResult(result, "Failed to present to swap chain");
 }
 
 }  // namespace computer_graphics

@@ -21,13 +21,19 @@ class Game {
 
   public:
     explicit Game(Window &window, InputDevice &input_device);
-    ~Game();
+    virtual ~Game();
 
     [[nodiscard]] const Timer::Duration &TimePerUpdate() const;
     void TimePerUpdate(Timer::Duration time_per_update);
 
     [[nodiscard]] const math::Color &ClearColor() const;
     [[nodiscard]] math::Color &ClearColor();
+
+    [[nodiscard]] const Window *Window() const;
+    [[nodiscard]] class Window *Window();
+
+    [[nodiscard]] const Timer& Timer() const;
+    [[nodiscard]] class Timer& Timer();
 
     [[nodiscard]] bool IsRunning() const;
 
@@ -39,22 +45,25 @@ class Game {
     void Run();
     void Exit();
 
+  protected:
+    virtual void Update(float delta_time);
+    virtual void Draw();
+
   private:
     void InitializeDevice();
-    void InitializeSwapChain(const Window &window);
+    void InitializeSwapChain(const class Window &window);
     void InitializeRenderTargetView();
 
-    void Update(float delta_time);
-    void Draw();
+    void DrawInternal();
 
     [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
 
-    Timer timer_;
+    class Timer timer_;
     Timer::Duration time_per_update_;
 
     InputDevice &input_device_;
 
-    Window &window_;
+    class Window &window_;
     UINT target_width_;
     UINT target_height_;
 
