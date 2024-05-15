@@ -35,6 +35,11 @@ class Component {
 
     [[nodiscard]] const Timer &Timer() const;
 
+    [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
+    [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
+
+    void Exit();
+
   private:
     std::reference_wrapper<Game> game_;
 };

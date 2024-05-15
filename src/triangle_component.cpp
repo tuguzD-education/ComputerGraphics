@@ -100,14 +100,9 @@ void TriangleComponent::InitializeVertexShader() {
 }
 
 void TriangleComponent::InitializeIndexShader() {
-    std::array shader_macros{
-        D3D_SHADER_MACRO{.Name = "TEST", .Definition = "1"},
-        D3D_SHADER_MACRO{.Name = "TCOLOR", .Definition = "float4(0.0f, 1.0f, 0.0f, 1.0f)"},
-        D3D_SHADER_MACRO{.Name = nullptr, .Definition = nullptr},
-    };
     index_byte_code_ =
         detail::CompileFromFile(
-            "resources/shaders/shader.hlsl", shader_macros.data() /*macros*/, nullptr /*include*/,
+            "resources/shaders/shader.hlsl", nullptr /*macros*/, nullptr /*include*/,
             "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
     HRESULT result = Device()->CreatePixelShader(

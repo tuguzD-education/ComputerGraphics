@@ -5,26 +5,16 @@
 
 #include <array>
 
-#include "computer_graphics/triangle_component.hpp"
+#include <computer_graphics/triangle_component.hpp>
 
 class SquareComponent : public computer_graphics::TriangleComponent {
   public:
     explicit SquareComponent(computer_graphics::Game &game);
 
-    void Update(float delta_time) override;
-
   private:
     static std::array<Vertex, 4> vertices;
     static std::array<Index, 6> indices;
 };
-
-void SquareComponent::Update(float delta_time) {
-    auto &position = Position();
-    position.x += 0.5f * delta_time;
-    if (position.x > 1.5f) {
-        position.x -= 3.0f;
-    }
-}
 
 SquareComponent::SquareComponent(computer_graphics::Game &game) : TriangleComponent{game, vertices, indices} {}
 

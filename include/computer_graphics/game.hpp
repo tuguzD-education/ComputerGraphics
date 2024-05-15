@@ -6,6 +6,7 @@
 #include <d3d11.h>
 
 #include <memory>
+#include <span>
 #include <vector>
 
 #include "detail/d3d_ptr.hpp"
@@ -15,6 +16,9 @@
 namespace computer_graphics {
 
 class Game {
+  private:
+    friend class Component;
+
   public:
     explicit Game(Window &window, InputDevice &input_device);
     ~Game();
@@ -30,18 +34,20 @@ class Game {
     template <typename T, typename... Args>
     void AddComponent(Args &&...args);
 
+    [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
+
     void Run();
     void Exit();
 
   private:
-    friend class Component;
-
     void InitializeDevice();
     void InitializeSwapChain(const Window &window);
     void InitializeRenderTargetView();
 
     void Update(float delta_time);
     void Draw();
+
+    [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
 
     Timer timer_;
     Timer::Duration time_per_update_;

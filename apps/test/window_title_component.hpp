@@ -3,7 +3,7 @@
 #ifndef WINDOW_TITLE_COMPONENT_HPP_INCLUDED
 #define WINDOW_TITLE_COMPONENT_HPP_INCLUDED
 
-#include "computer_graphics/triangle_component.hpp"
+#include <computer_graphics/triangle_component.hpp>
 
 class WindowTitleComponent : public computer_graphics::Component {
   public:

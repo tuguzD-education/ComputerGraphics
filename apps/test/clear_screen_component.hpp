@@ -3,7 +3,7 @@
 #ifndef CLEAR_SCREEN_COMPONENT_HPP_INCLUDED
 #define CLEAR_SCREEN_COMPONENT_HPP_INCLUDED
 
-#include "computer_graphics/component.hpp"
+#include <computer_graphics/component.hpp>
 
 class ClearScreenComponent : public computer_graphics::Component {
   public:

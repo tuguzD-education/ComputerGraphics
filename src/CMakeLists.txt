@@ -13,7 +13,8 @@ set(HEADER_LIST
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/input_device.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/delegates.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/component.hpp
-        ${PROJECT_SOURCE_DIR}/include/computer_graphics/triangle_component.hpp)
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/triangle_component.hpp
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/box_component.hpp)
 set(SOURCE_LIST
         detail/err_handling_api.cpp
         detail/string_api_set.cpp
@@ -24,7 +25,8 @@ set(SOURCE_LIST
         input_device.cpp
         delegates.cpp
         component.cpp
-        triangle_component.cpp)
+        triangle_component.cpp
+        box_component.cpp)
 
 find_package(directxtk CONFIG REQUIRED)
 
