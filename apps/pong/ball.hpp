@@ -11,12 +11,12 @@ class Ball : public computer_graphics::BoxComponent {
   public:
     explicit Ball(computer_graphics::Game &game);
 
-    void Reset();
+    void Reset(const Player *won_player = nullptr);
 
     void Update(float delta_time) override;
 
   private:
-    [[nodiscard]] static computer_graphics::math::Vector3 RandomVelocity();
+    [[nodiscard]] static computer_graphics::math::Vector3 RandomVelocity(const Player *won_player = nullptr);
 
     computer_graphics::math::Vector3 velocity_;
 };
@@ -26,9 +26,9 @@ inline Ball::Ball(computer_graphics::Game &game)
         computer_graphics::math::Color{1.0f, 1.0f, 1.0f}),
       velocity_{RandomVelocity()} {}
 
-inline void Ball::Reset() {
+inline void Ball::Reset(const Player *won_player) {
     Position() = computer_graphics::math::Vector3{};
-    velocity_ = RandomVelocity();
+    velocity_ = RandomVelocity(won_player);
 }
 
 inline void Ball::Update(float delta_time) {
@@ -57,7 +57,7 @@ inline void Ball::Update(float delta_time) {
     position += velocity_ * delta_time;
 }
 
-inline computer_graphics::math::Vector3 Ball::RandomVelocity() {
+inline computer_graphics::math::Vector3 Ball::RandomVelocity(const Player *won_player) {
     static std::random_device device;
     static std::default_random_engine engine{device()};
     static std::uniform_real_distribution distribution{-1.0f, 1.0f};
@@ -65,6 +65,15 @@ inline computer_graphics::math::Vector3 Ball::RandomVelocity() {
     float x = distribution(engine);
     x += (x < 0) ? -1 : 1;
     float y = distribution(engine);
+
+    if (won_player != nullptr) {
+        if (won_player->Team() == Team::Blue) {
+            x = std::abs(x);
+        } else if (won_player->Team() == Team::Red) {
+            x = -std::abs(x);
+        }
+    }
+
     computer_graphics::math::Vector3 vector{x, y, 0.0f};
     vector.Normalize();
     return vector;

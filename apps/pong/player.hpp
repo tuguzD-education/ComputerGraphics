@@ -18,25 +18,31 @@ class Player final : public computer_graphics::BoxComponent {
     explicit Player(
         computer_graphics::Game &game, computer_graphics::math::Color color, Team team, ControlKeys controls);
 
+    [[nodiscard]] Team Team() const;
+
     void Reset();
 
     void Update(float delta_time) override;
 
   private:
-    Team team_;
+    ::Team team_;
     ControlKeys controls_;
 
-    static computer_graphics::math::Vector3 PositionFrom(Team team);
+    static computer_graphics::math::Vector3 PositionFrom(::Team team);
 };
 
 inline Player::Player(
     computer_graphics::Game &game, const computer_graphics::math::Color color,
-    const Team team, const ControlKeys controls)
+    const ::Team team, const ControlKeys controls)
     : BoxComponent(game, 0.05f, 0.3f, color, PositionFrom(team)),
       team_{team}, controls_{controls} {}
 
 inline void Player::Reset() {
     Position() = PositionFrom(team_);
+}
+
+inline Team Player::Team() const {
+    return team_;
 }
 
 inline void Player::Update(const float delta_time) {
@@ -59,7 +65,7 @@ inline void Player::Update(const float delta_time) {
     }
 }
 
-inline computer_graphics::math::Vector3 Player::PositionFrom(const Team team) {
+inline computer_graphics::math::Vector3 Player::PositionFrom(const ::Team team) {
     switch (team) {
         case Team::Red: {
             return {-0.975f, 0.0f, 0.0f};

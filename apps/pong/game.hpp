@@ -24,6 +24,8 @@ class Game final : public computer_graphics::Game {
 
     Player &blue_player_;
     std::size_t blue_score_;
+
+    Player *won_player = nullptr;
 };
 
 inline Game::Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device)
@@ -49,14 +51,16 @@ inline void Game::Update(float delta_time) {
 
     if (const auto &x = ball_.Position().x; x < -0.975f) {
         std::cout << "One point to the BLUE!";
+        won_player = &blue_player_;
         blue_score_++;
     } else if (x > 0.975f) {
         std::cout << "One point to the RED!";
+        won_player = &red_player_;
         red_score_++;
     } else
         return;
 
-    ball_.Reset();
+    ball_.Reset(won_player);
     red_player_.Reset();
     blue_player_.Reset();
 
