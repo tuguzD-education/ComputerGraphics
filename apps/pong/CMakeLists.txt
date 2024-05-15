@@ -1,7 +1,7 @@
 set(HEADER_LIST
-        direction.hpp
         player.hpp
         ball.hpp
+        team.hpp
         host.hpp)
 set(SOURCE_LIST
         main.cpp)

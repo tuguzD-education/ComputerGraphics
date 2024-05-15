@@ -7,7 +7,7 @@
 #include "player.hpp"
 
 int main() {
-    computer_graphics::Window window{"Pong", 800, 800};
+    computer_graphics::Window window{"PONG", 800, 800};
     computer_graphics::InputDevice input_device{window};
     computer_graphics::Game game{window, input_device};
 
@@ -18,14 +18,16 @@ int main() {
 
     game.AddComponent<Ball>();
     game.AddComponent<Player>(
-        Direction::Left,
+        computer_graphics::math::colors::srgb::Red.v,
+        Team::Red,
         Player::ControlKeys{
             .up = computer_graphics::InputKey::W,
             .down = computer_graphics::InputKey::S,
         }
     );
     game.AddComponent<Player>(
-        Direction::Right,
+        computer_graphics::math::colors::srgb::Blue.v,
+        Team::Blue,
         Player::ControlKeys{
             .up = computer_graphics::InputKey::Up,
             .down = computer_graphics::InputKey::Down,

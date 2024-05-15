@@ -6,7 +6,7 @@
 #include <computer_graphics/box_component.hpp>
 #include <computer_graphics/input_key.hpp>
 
-#include "direction.hpp"
+#include "team.hpp"
 
 class Player : public computer_graphics::BoxComponent {
   public:
@@ -15,28 +15,28 @@ class Player : public computer_graphics::BoxComponent {
         computer_graphics::InputKey down;
     };
 
-    explicit Player(computer_graphics::Game &game, Direction direction, ControlKeys controls);
+    explicit Player(
+        computer_graphics::Game &game, computer_graphics::math::Color color, Team team, ControlKeys controls);
 
-    [[nodiscard]] Direction Direction() const;
+    [[nodiscard]] Team Team() const;
     [[nodiscard]] ControlKeys Controls() const;
 
     void Update(float delta_time) override;
 
   private:
-    ::Direction direction_;
+    ::Team team_;
     ControlKeys controls_;
 
-    static computer_graphics::math::Vector3 PositionFrom(::Direction direction);
+    static computer_graphics::math::Vector3 PositionFrom(::Team direction);
 };
 
-Player::Player(computer_graphics::Game &game, ::Direction direction, ControlKeys controls)
-    : BoxComponent(game, 0.05f, 0.3f,
-        computer_graphics::math::Color{1.0f, 1.0f, 1.0f}, PositionFrom(direction)),
-      direction_{direction},
+Player::Player(computer_graphics::Game &game, computer_graphics::math::Color color, ::Team team, ControlKeys controls)
+    : BoxComponent(game, 0.05f, 0.3f, color, PositionFrom(team)),
+      team_{team},
       controls_{controls} {}
 
-Direction Player::Direction() const {
-    return direction_;
+Team Player::Team() const {
+    return team_;
 }
 
 Player::ControlKeys Player::Controls() const {
@@ -50,12 +50,12 @@ void Player::Update(float delta_time) {
     }
 
     auto &position = Position();
-    if (input_device->IsKeyDown(controls_.up)) {
-        position += computer_graphics::math::Vector3::Up * (2.0f * delta_time);
-    }
-    if (input_device->IsKeyDown(controls_.down)) {
-        position += computer_graphics::math::Vector3::Down * (2.0f * delta_time);
-    }
+    const auto y = static_cast<float>(
+        input_device->IsKeyDown(controls_.up) - input_device->IsKeyDown(controls_.down));
+    const computer_graphics::math::Vector3 movement =
+        computer_graphics::math::Vector3::Up * y;
+    constexpr float speed = 2.0f;
+    position += speed * movement * delta_time;
 
     if (position.y > 0.85f) {
         position.y = 0.85f;
@@ -64,13 +64,13 @@ void Player::Update(float delta_time) {
     }
 }
 
-computer_graphics::math::Vector3 Player::PositionFrom(::Direction direction) {
+computer_graphics::math::Vector3 Player::PositionFrom(::Team direction) {
     switch (direction) {
-        case Direction::Left: {
-            return {-0.9f, 0.0f, 0.0f};
+        case Team::Red: {
+            return {-0.975f, 0.0f, 0.0f};
         }
-        case Direction::Right: {
-            return {0.9f, 0.0f, 0.0f};
+        case Team::Blue: {
+            return {0.975f, 0.0f, 0.0f};
         }
     }
 }

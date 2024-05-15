@@ -13,11 +13,11 @@ class Host : public computer_graphics::Component {
     void Draw() override;
 
   private:
-    std::size_t left_score_;
-    std::size_t right_score_;
+    std::size_t red_score_;
+    std::size_t blue_score_;
 };
 
-Host::Host(computer_graphics::Game& game) : Component(game), left_score_{}, right_score_{} {}
+Host::Host(computer_graphics::Game& game) : Component(game), red_score_{}, blue_score_{} {}
 
 void Host::Update(float delta_time) {
     Ball* ball = nullptr;
@@ -28,19 +28,29 @@ void Host::Update(float delta_time) {
 
     const auto& position = ball->Position();
     if (position.x < -1.0f) {
-        right_score_++;
+        blue_score_++;
     } else if (position.x > 1.0f) {
-        left_score_++;
+        red_score_++;
     } else
         return;
 
     ball->Reset();
     std::cout << "Score:"
-              << "\n\tLeft: " << left_score_
-              << "\n\tRight: " << right_score_
+              << "\n\tRed: " << red_score_
+              << "\n\tBlue: " << blue_score_
               << std::endl;
 }
 
-void Host::Draw() {}
+void Host::Draw() {
+    computer_graphics::Window *window = Window();
+    if (window == nullptr) {
+        return;
+    }
+
+    std::string title = "PONG ";
+    std::format_to(std::back_inserter(title),
+        "[ Red: {} | Blue: {} ]", red_score_, blue_score_);
+    window->Title(title);
+}
 
 #endif  // HOST_HPP_INCLUDED

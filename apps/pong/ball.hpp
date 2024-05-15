@@ -33,13 +33,10 @@ void Ball::Reset() {
 void Ball::Update(float delta_time) {
     computer_graphics::math::Vector3 normal;
     velocity_.Normalize(normal);
-    velocity_ += normal * (0.05f * delta_time);
+    velocity_ += normal * (0.25f * delta_time);
 
     auto &position = Position();
-    if (position.x < -1.0f || position.x > 1.0f) {
-        velocity_.x = -velocity_.x;
-    }
-    if (position.y < -1.0f || position.y > 1.0f) {
+    if (std::abs(position.y) > 0.975f) {
         velocity_.y = -velocity_.y;
     }
 
