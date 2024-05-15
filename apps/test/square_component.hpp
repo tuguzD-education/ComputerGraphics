@@ -4,7 +4,6 @@
 #define SQUARE_COMPONENT_HPP_INCLUDED
 
 #include <array>
-
 #include <computer_graphics/triangle_component.hpp>
 
 class SquareComponent : public computer_graphics::TriangleComponent {
@@ -16,7 +15,7 @@ class SquareComponent : public computer_graphics::TriangleComponent {
     static std::array<Index, 6> indices;
 };
 
-SquareComponent::SquareComponent(computer_graphics::Game &game) : TriangleComponent{game, vertices, indices} {}
+inline SquareComponent::SquareComponent(computer_graphics::Game &game) : TriangleComponent{game, vertices, indices} {}
 
 std::array<SquareComponent::Vertex, 4> SquareComponent::vertices{
     Vertex{

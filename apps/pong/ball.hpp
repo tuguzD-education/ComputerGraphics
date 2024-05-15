@@ -21,16 +21,15 @@ class Ball : public computer_graphics::BoxComponent {
     computer_graphics::math::Vector3 velocity_;
 };
 
-Ball::Ball(computer_graphics::Game &game)
-    : BoxComponent(game, 0.05f, 0.05f,
-        computer_graphics::math::Color{1.0f, 1.0f, 1.0f}), velocity_{RandomVelocity()} {}
+inline Ball::Ball(computer_graphics::Game &game)
+    : BoxComponent(game, 0.05f, 0.05f, computer_graphics::math::Color{1.0f, 1.0f, 1.0f}), velocity_{RandomVelocity()} {}
 
-void Ball::Reset() {
+inline void Ball::Reset() {
     Position() = computer_graphics::math::Vector3{};
     velocity_ = RandomVelocity();
 }
 
-void Ball::Update(float delta_time) {
+inline void Ball::Update(float delta_time) {
     computer_graphics::math::Vector3 normal;
     velocity_.Normalize(normal);
     velocity_ += normal * (0.25f * delta_time);
@@ -56,7 +55,7 @@ void Ball::Update(float delta_time) {
     position += velocity_ * delta_time;
 }
 
-computer_graphics::math::Vector3 Ball::RandomVelocity() {
+inline computer_graphics::math::Vector3 Ball::RandomVelocity() {
     static std::random_device device;
     static std::default_random_engine engine{device()};
     static std::uniform_real_distribution distribution{-1.0f, 1.0f};

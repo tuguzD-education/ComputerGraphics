@@ -1,6 +1,6 @@
 set(HEADER_LIST
         square_component.hpp
-        test_game.hpp)
+        game.hpp)
 set(SOURCE_LIST
         main.cpp)
 

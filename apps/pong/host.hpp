@@ -17,9 +17,9 @@ class Host : public computer_graphics::Component {
     std::size_t blue_score_;
 };
 
-Host::Host(computer_graphics::Game& game) : Component(game), red_score_{}, blue_score_{} {}
+inline Host::Host(computer_graphics::Game& game) : Component(game), red_score_{}, blue_score_{} {}
 
-void Host::Update(float delta_time) {
+inline void Host::Update(float delta_time) {
     Ball* ball = nullptr;
     for (auto& component : Components()) {
         if (ball == nullptr) ball = dynamic_cast<Ball*>(component.get());
@@ -41,7 +41,7 @@ void Host::Update(float delta_time) {
               << std::endl;
 }
 
-void Host::Draw() {
+inline void Host::Draw() {
     computer_graphics::Window *window = Window();
     if (window == nullptr) {
         return;

@@ -5,9 +5,9 @@
 
 #include "computer_graphics/game.hpp"
 
-class TestGame final : public computer_graphics::Game {
+class Game final : public computer_graphics::Game {
   public:
-    explicit TestGame(computer_graphics::Window &window, computer_graphics::InputDevice &input_device);
+    explicit Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device);
 
   protected:
     void Draw() override;
@@ -19,17 +19,17 @@ class TestGame final : public computer_graphics::Game {
     std::string initial_title_;
 };
 
-inline TestGame::TestGame(computer_graphics::Window &window, computer_graphics::InputDevice &input_device)
-    : Game(window, input_device) {}
+inline Game::Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device)
+    : computer_graphics::Game(window, input_device) {}
 
-inline void TestGame::Draw() {
-    Game::Draw();
+inline void Game::Draw() {
+    computer_graphics::Game::Draw();
 
     UpdateTitle();
     UpdateClearColor();
 }
 
-inline void TestGame::UpdateTitle() {
+inline void Game::UpdateTitle() {
     float fps = Timer().FramesPerSecond();
     if (fps <= 0) {
         initial_title_ = Window()->Title();
@@ -41,7 +41,7 @@ inline void TestGame::UpdateTitle() {
     Window()->Title(title);
 }
 
-inline void TestGame::UpdateClearColor() {
+inline void Game::UpdateClearColor() {
     const float start_time = Timer().StartTime();
     const float red = start_time - std::floor(start_time);
 
