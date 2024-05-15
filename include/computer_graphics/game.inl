@@ -5,10 +5,10 @@
 
 namespace computer_graphics {
 
-template <typename T, typename... Args>
-void Game::AddComponent(Args &&...args) {
-    auto component = std::make_unique<T>(*this, std::forward<Args>(args)...);
-    components_.push_back(std::move(component));
+template <std::derived_from<Component> T, typename... Args>
+T &Game::AddComponent(Args &&...args) {
+    auto &component = components_.emplace_back(std::make_unique<T>(*this, std::forward<Args>(args)...));
+    return dynamic_cast<T &>(*component);
 }
 
 }  // namespace computer_graphics

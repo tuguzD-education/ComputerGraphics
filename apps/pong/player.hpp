@@ -8,49 +8,46 @@
 
 #include "team.hpp"
 
-class Player : public computer_graphics::BoxComponent {
+class Player final : public computer_graphics::BoxComponent {
   public:
     struct ControlKeys {
         computer_graphics::InputKey up;
         computer_graphics::InputKey down;
     };
 
-    explicit Player(computer_graphics::Game &game, computer_graphics::math::Color color, Team team,
-                    ControlKeys controls);
+    explicit Player(
+        computer_graphics::Game &game, computer_graphics::math::Color color, Team team, ControlKeys controls);
 
-    [[nodiscard]] Team Team() const;
-    [[nodiscard]] ControlKeys Controls() const;
+    void Reset();
 
     void Update(float delta_time) override;
 
   private:
-    ::Team team_;
+    Team team_;
     ControlKeys controls_;
 
-    static computer_graphics::math::Vector3 PositionFrom(::Team direction);
+    static computer_graphics::math::Vector3 PositionFrom(Team team);
 };
 
 inline Player::Player(
-    computer_graphics::Game &game, computer_graphics::math::Color color,
-    ::Team team, ControlKeys controls)
-    : BoxComponent(game, 0.05f, 0.3f, color, PositionFrom(team)), team_{team}, controls_{controls} {}
+    computer_graphics::Game &game, const computer_graphics::math::Color color,
+    const Team team, const ControlKeys controls)
+    : BoxComponent(game, 0.05f, 0.3f, color, PositionFrom(team)),
+      team_{team}, controls_{controls} {}
 
-inline Team Player::Team() const {
-    return team_;
+inline void Player::Reset() {
+    Position() = PositionFrom(team_);
 }
 
-inline Player::ControlKeys Player::Controls() const {
-    return controls_;
-}
-
-inline void Player::Update(float delta_time) {
-    auto *input_device = InputDevice();
+inline void Player::Update(const float delta_time) {
+    const auto *input_device = InputDevice();
     if (input_device == nullptr) {
         return;
     }
 
     auto &position = Position();
-    const auto y = static_cast<float>(input_device->IsKeyDown(controls_.up) - input_device->IsKeyDown(controls_.down));
+    const auto y = static_cast<float>(
+        input_device->IsKeyDown(controls_.up) - input_device->IsKeyDown(controls_.down));
     const computer_graphics::math::Vector3 movement = computer_graphics::math::Vector3::Up * y;
     constexpr float speed = 2.0f;
     position += speed * movement * delta_time;
@@ -62,8 +59,8 @@ inline void Player::Update(float delta_time) {
     }
 }
 
-inline computer_graphics::math::Vector3 Player::PositionFrom(::Team direction) {
-    switch (direction) {
+inline computer_graphics::math::Vector3 Player::PositionFrom(const Team team) {
+    switch (team) {
         case Team::Red: {
             return {-0.975f, 0.0f, 0.0f};
         }

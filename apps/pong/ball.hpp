@@ -22,7 +22,9 @@ class Ball : public computer_graphics::BoxComponent {
 };
 
 inline Ball::Ball(computer_graphics::Game &game)
-    : BoxComponent(game, 0.05f, 0.05f, computer_graphics::math::Color{1.0f, 1.0f, 1.0f}), velocity_{RandomVelocity()} {}
+    : BoxComponent(game, 0.05f, 0.05f,
+        computer_graphics::math::Color{1.0f, 1.0f, 1.0f}),
+      velocity_{RandomVelocity()} {}
 
 inline void Ball::Reset() {
     Position() = computer_graphics::math::Vector3{};

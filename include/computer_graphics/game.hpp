@@ -37,8 +37,8 @@ class Game {
 
     [[nodiscard]] bool IsRunning() const;
 
-    template <typename T, typename... Args>
-    void AddComponent(Args &&...args);
+    template <std::derived_from<Component> T, typename... Args>
+    T &AddComponent(Args &&...args);
 
     [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
 
