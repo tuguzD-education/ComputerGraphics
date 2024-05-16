@@ -16,7 +16,7 @@ class Window {
     explicit Window(std::string_view name, LONG width, LONG height, HINSTANCE instance_handle = nullptr);
     ~Window();
 
-    bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK);
+    bool ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type = MB_OK) const;
 
     [[nodiscard]] HWND RawHandle() const;
     [[nodiscard]] HINSTANCE RawInstanceHandle() const;
@@ -30,8 +30,8 @@ class Window {
     [[nodiscard]] std::string Title() const;
     bool Title(std::string_view title);
 
-    void ProcessQueueMessages();
-    void Destroy();
+    void ProcessQueueMessages() const;
+    void Destroy() const;
 
   private:
     friend class InputDevice;

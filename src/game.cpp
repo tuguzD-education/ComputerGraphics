@@ -13,9 +13,9 @@ namespace computer_graphics {
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
 Game::Game(class Window &window, InputDevice &input_device)
-    : window_{window},
+    : time_per_update_{default_time_per_update},
       input_device_{input_device},
-      time_per_update_{default_time_per_update},
+      window_{window},
       target_width_{},
       target_height_{},
       should_exit_{},
@@ -86,7 +86,7 @@ void Game::Run() {
         lag += timer_.CurrentTickTimePoint() - timer_.PreviousTickTimePoint();
 
         while (lag >= time_per_update_) {
-            float delta_time = Timer::SecondsFrom(time_per_update_);
+            const float delta_time = Timer::SecondsFrom(time_per_update_);
             Update(delta_time);
             lag -= time_per_update_;
         }
@@ -103,20 +103,17 @@ void Game::Exit() {
 }
 
 void Game::InitializeDevice() {
-    std::array feature_level{
-        D3D_FEATURE_LEVEL_11_1,
-    };
-    HRESULT result =
-        D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG, feature_level.data(),
-                          feature_level.size(), D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
+    constexpr std::array feature_level{D3D_FEATURE_LEVEL_11_1};
+    const HRESULT result = D3D11CreateDevice(
+        nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, D3D11_CREATE_DEVICE_DEBUG,
+        feature_level.data(), feature_level.size(),
+        D3D11_SDK_VERSION, &device_, nullptr, &device_context_);
     detail::CheckResult(result, "Failed to create device");
 }
 
 void Game::InitializeSwapChain(const class Window &window) {
-    HRESULT result;
-
     detail::D3DPtr<IDXGIDevice> dxgi_device;
-    result = device_.As(&dxgi_device);
+    HRESULT result = device_.As(&dxgi_device);
     detail::CheckResult(result, "Failed to cast device to DXGI device");
 
     detail::D3DPtr<IDXGIAdapter> dxgi_adapter;
@@ -205,14 +202,16 @@ void Game::DrawInternal() {
     device_context_->RSSetViewports(viewports.size(), viewports.data());
 
     const std::array render_targets{render_target_view_.Get()};
-    device_context_->OMSetRenderTargets(render_targets.size(), render_targets.data(), nullptr);
+    device_context_->OMSetRenderTargets(
+        render_targets.size(), render_targets.data(), nullptr);
 
     device_context_->ClearRenderTargetView(render_target_view_.Get(), clear_color_);
 
     Draw();
 
     constexpr std::array<ID3D11RenderTargetView *, 0> no_render_targets{};
-    device_context_->OMSetRenderTargets(no_render_targets.size(), no_render_targets.data(), nullptr);
+    device_context_->OMSetRenderTargets(
+        no_render_targets.size(), no_render_targets.data(), nullptr);
 
     const HRESULT result = swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
     detail::CheckResult(result, "Failed to present to swap chain");

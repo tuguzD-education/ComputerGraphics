@@ -58,7 +58,7 @@ std::span<std::unique_ptr<Component>> Component::Components() {
     return game_.get().Components();
 }
 
-void Component::Exit() {
+void Component::Exit() const {
     game_.get().Exit();
 }
 

@@ -38,7 +38,7 @@ class Component {
     [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
     [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
 
-    void Exit();
+    void Exit() const;
 
   private:
     std::reference_wrapper<Game> game_;

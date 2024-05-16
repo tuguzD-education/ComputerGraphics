@@ -46,7 +46,7 @@ inline Game::Game(computer_graphics::Window &window, computer_graphics::InputDev
           })},
       blue_score_{} {}
 
-inline void Game::Update(float delta_time) {
+inline void Game::Update(const float delta_time) {
     computer_graphics::Game::Update(delta_time);
 
     if (const auto &x = ball_.Position().x; x < -0.975f) {

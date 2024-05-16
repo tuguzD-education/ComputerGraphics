@@ -6,7 +6,9 @@ namespace computer_graphics {
 
 namespace detail {
 
-std::array<BoxComponent::Vertex, 4> BoxVertices(float width, float height, math::Color color) {
+std::array<BoxComponent::Vertex, 4> BoxVertices(
+    const float width, const float height, const math::Color color) {
+
     float left = -width / 2;
     float top = height / 2;
     float right = width / 2;
@@ -30,9 +32,10 @@ T &Unmove(T &&t) {
 
 }  // namespace detail
 
-BoxComponent::BoxComponent(Game &game, float width, float height, math::Color color, math::Vector3 position)
-    : TriangleComponent(game,
-        detail::Unmove(detail::BoxVertices(width, height, color)),
+BoxComponent::BoxComponent(
+    Game &game, const float width, const float height, const math::Color color, const math::Vector3 position)
+    : TriangleComponent(
+        game, detail::Unmove(detail::BoxVertices(width, height, color)),
         detail::Unmove(detail::BoxIndices()), position),
       width_{width},
       height_{height} {}
@@ -46,8 +49,8 @@ float BoxComponent::Height() const {
 }
 
 BoxComponent::Box BoxComponent::Collision() const {
-    math::Vector3 center = Position();
-    math::Vector3 extents = math::Vector3{Width() / 2, Height() / 2, 0.0f};
+    const math::Vector3 center = Position();
+    const auto extents = math::Vector3{Width() / 2, Height() / 2, 0.0f};
     return Box{center, extents};
 }
 

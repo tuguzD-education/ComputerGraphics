@@ -8,14 +8,14 @@
 
 namespace computer_graphics {
 
-Window::Window(std::string_view name, LONG width, LONG height, HINSTANCE instance_handle)
+Window::Window(const std::string_view name, const LONG width, const LONG height, HINSTANCE instance_handle)
     : input_device_{}, is_destroyed_{} {
     instance_handle = (instance_handle != nullptr) ? instance_handle : GetModuleHandle(nullptr);
 
-    std::basic_string<TCHAR> t_name = detail::MultiByteToTChar(CP_UTF8, 0, name);
-    LPCTSTR c_name = t_name.c_str();
+    const std::basic_string<TCHAR> t_name = detail::MultiByteToTChar(CP_UTF8, 0, name);
+    const LPCTSTR c_name = t_name.c_str();
 
-    auto icon = LoadIcon(nullptr, IDI_WINLOGO);
+    const auto icon = LoadIcon(nullptr, IDI_WINLOGO);
     WNDCLASSEX wc{
         .cbSize = sizeof(decltype(wc)),
         .style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
@@ -51,7 +51,7 @@ Window::Window(std::string_view name, LONG width, LONG height, HINSTANCE instanc
     ShowCursor(true);
 }
 
-bool Window::ErrorBox(LPCTSTR text, LPCTSTR caption, UINT type) {
+bool Window::ErrorBox(const LPCTSTR text, const LPCTSTR caption, const UINT type) const {
     return MessageBox(handle_, text, caption, type);
 }
 
@@ -64,7 +64,7 @@ HWND Window::RawHandle() const {
 }
 
 HINSTANCE Window::RawInstanceHandle() const {
-    return (HINSTANCE) GetWindowLongPtr(handle_, GWLP_HINSTANCE);
+    return reinterpret_cast<HINSTANCE>(GetWindowLongPtr(handle_, GWLP_HINSTANCE));
 }
 
 math::Rectangle Window::Dimensions() const {
@@ -88,19 +88,19 @@ bool Window::IsFocused() const {
 }
 
 std::string Window::Title() const {
-    auto size = GetWindowTextLength(handle_);
+    const auto size = GetWindowTextLength(handle_);
     std::basic_string<TCHAR> title(size, TEXT('\0'));
     GetWindowText(handle_, title.data(), size + 1);
     return detail::TCharToMultiByte(CP_UTF8, 0, title);
 }
 
 bool Window::Title(std::string_view title) {
-    std::basic_string<TCHAR> t_title = detail::MultiByteToTChar(CP_UTF8, 0, title);
-    LPCTSTR c_title = t_title.c_str();
+    const std::basic_string<TCHAR> t_title = detail::MultiByteToTChar(CP_UTF8, 0, title);
+    const LPCTSTR c_title = t_title.c_str();
     return SetWindowText(handle_, c_title);
 }
 
-void Window::ProcessQueueMessages() {
+void Window::ProcessQueueMessages() const {
     MSG msg;
     while (PeekMessage(&msg, handle_, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -108,17 +108,17 @@ void Window::ProcessQueueMessages() {
     }
 }
 
-void Window::Destroy() {
+void Window::Destroy() const {
     if (IsDestroyed()) {
         return;
     }
     DestroyWindow(handle_);
 }
 
-LRESULT CALLBACK Window::WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param) {
+LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM w_param, const LPARAM l_param) {
     Window *window;
     if (u_message == WM_NCCREATE) {
-        auto create_struct = reinterpret_cast<LPCREATESTRUCT>(l_param);
+        const auto create_struct = reinterpret_cast<LPCREATESTRUCT>(l_param);
         window = static_cast<Window *>(create_struct->lpCreateParams);
         SetWindowLongPtr(h_wnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
     } else {
@@ -141,7 +141,7 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPA
             static std::vector<BYTE> lpb;
 
             UINT size;
-            auto h_raw_input = (HRAWINPUT)l_param;
+            const auto h_raw_input = reinterpret_cast<HRAWINPUT>(l_param);
             UINT result = ::GetRawInputData(
                 h_raw_input, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER));
             if (result) {
@@ -152,12 +152,10 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPA
             result = ::GetRawInputData(
                 h_raw_input, RID_INPUT, lpb.data(), &size, sizeof(RAWINPUTHEADER));
             if (result != size) {
-                throw std::runtime_error{
-                    "Failed to obtain raw input: GetRawInputData does not return correct size"
-                };
+                throw std::runtime_error{"Failed to obtain raw input: GetRawInputData does not return correct size"};
             }
 
-            auto raw_input = (RAWINPUT *)lpb.data();
+            const auto raw_input = reinterpret_cast<RAWINPUT *>(lpb.data());
             switch (raw_input->header.dwType) {
                 case RIM_TYPEKEYBOARD: {
                     input_device->OnRawKeyboard(raw_input->data.keyboard);

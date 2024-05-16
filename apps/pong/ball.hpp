@@ -7,7 +7,7 @@
 
 #include "player.hpp"
 
-class Ball : public computer_graphics::BoxComponent {
+class Ball final : public computer_graphics::BoxComponent {
   public:
     explicit Ball(computer_graphics::Game &game);
 
@@ -31,7 +31,7 @@ inline void Ball::Reset(const Player *won_player) {
     velocity_ = RandomVelocity(won_player);
 }
 
-inline void Ball::Update(float delta_time) {
+inline void Ball::Update(const float delta_time) {
     computer_graphics::math::Vector3 normal;
     velocity_.Normalize(normal);
     velocity_ += normal * (0.25f * delta_time);
@@ -42,7 +42,7 @@ inline void Ball::Update(float delta_time) {
     }
 
     for (const auto &component : Components()) {
-        auto player = dynamic_cast<const Player *>(component.get());
+        const auto player = dynamic_cast<const Player *>(component.get());
         if (player == nullptr) {
             continue;
         }

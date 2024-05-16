@@ -30,7 +30,7 @@ InputDevice::InputDevice(Window &window) : window_{window}, mouse_move_data_{} {
         raw_input_devices.data(), raw_input_devices.size(),
         sizeof(decltype(raw_input_devices)::value_type)
         )) {
-        std::string message = detail::LastError();
+        const std::string message = detail::LastError();
         throw std::runtime_error{message};
     }
 
@@ -42,8 +42,8 @@ InputDevice::~InputDevice() {
     window_.input_device_ = nullptr;
 }
 
-bool InputDevice::IsKeyDown(InputKey key) const {
-    return keys_.count(key) > 0;
+bool InputDevice::IsKeyDown(const InputKey key) const {
+    return keys_.contains(key);
 }
 
 const MouseMoveData &InputDevice::MouseMoveData() const {
@@ -79,7 +79,7 @@ OnInputKeyDown &InputDevice::OnInputKeyDown() {
 }
 
 void InputDevice::OnRawKeyboard(const RAWKEYBOARD &data) {
-    bool is_key_up = data.Flags & RI_KEY_BREAK;
+    const bool is_key_up = data.Flags & RI_KEY_BREAK;
 
     auto key = static_cast<InputKey>(data.VKey);
     if (data.MakeCode == 42) {
@@ -127,12 +127,12 @@ void InputDevice::OnRawMouse(const RAWMOUSE &data) {
     on_mouse_move_.Broadcast(mouse_move_data_);
 }
 
-void InputDevice::AddPressedKey(InputKey key) {
+void InputDevice::AddPressedKey(const InputKey key) {
     keys_.insert(key);
     on_input_key_down_.Broadcast(key);
 }
 
-void InputDevice::RemovePressedKey(InputKey key) {
+void InputDevice::RemovePressedKey(const InputKey key) {
     keys_.erase(key);
     on_input_key_up_.Broadcast(key);
 }

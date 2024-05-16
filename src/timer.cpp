@@ -6,7 +6,7 @@ Timer::Timer() noexcept : Timer{Clock::now()} {}
 
 Timer::Timer(std::nullptr_t) noexcept : Timer{TimePoint{}} {}
 
-Timer::Timer(TimePoint time_point) noexcept
+Timer::Timer(const TimePoint time_point) noexcept
     : start_{time_point},
       current_{start_},
       previous_{current_},
@@ -24,7 +24,7 @@ void Timer::Tick() {
 
     frame_count_ += 1;
     constexpr auto second = std::chrono::seconds{1};
-    Duration time_from_previous_frame = current_ - previous_frame_;
+    const Duration time_from_previous_frame = current_ - previous_frame_;
 
     if (time_from_previous_frame > second) {
         frames_per_second_ = static_cast<float>(frame_count_) / SecondsFrom(time_from_previous_frame);
@@ -61,14 +61,14 @@ auto Timer::PreviousTickTimePoint() const -> TimePoint {
     return previous_;
 }
 
-float Timer::SecondsFromCurrent(TimePoint time_point) const {
+float Timer::SecondsFromCurrent(const TimePoint time_point) const {
     return SecondsFrom(current_ - time_point);
 }
 
-float Timer::SecondsFrom(Duration duration) {
+float Timer::SecondsFrom(const Duration duration) {
     using std::chrono::microseconds;
 
-    auto ticks = std::chrono::duration_cast<microseconds>(duration).count();
+    const auto ticks = std::chrono::duration_cast<microseconds>(duration).count();
     return static_cast<float>(ticks) / microseconds::period::den;
 }
 

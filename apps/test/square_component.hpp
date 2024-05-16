@@ -6,7 +6,7 @@
 #include <array>
 #include <computer_graphics/triangle_component.hpp>
 
-class SquareComponent : public computer_graphics::TriangleComponent {
+class SquareComponent final : public computer_graphics::TriangleComponent {
   public:
     explicit SquareComponent(computer_graphics::Game &game);
 
@@ -15,7 +15,8 @@ class SquareComponent : public computer_graphics::TriangleComponent {
     static std::array<Index, 6> indices;
 };
 
-inline SquareComponent::SquareComponent(computer_graphics::Game &game) : TriangleComponent{game, vertices, indices} {}
+inline SquareComponent::SquareComponent(computer_graphics::Game &game)
+    : TriangleComponent{game, vertices, indices} {}
 
 std::array<SquareComponent::Vertex, 4> SquareComponent::vertices{
     Vertex{
