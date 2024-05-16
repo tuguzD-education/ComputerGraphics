@@ -21,19 +21,19 @@ inline SquareComponent::SquareComponent(computer_graphics::Game &game)
 std::array<SquareComponent::Vertex, 4> SquareComponent::vertices{
     Vertex{
         computer_graphics::math::Vector3{0.5f, 0.5f, 0.0f},
-        computer_graphics::math::Color{1.0f, 0.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::srgb::Red.v,
     },
     Vertex{
         computer_graphics::math::Vector3{-0.5f, -0.5f, 0.0f},
-        computer_graphics::math::Color{0.0f, 0.0f, 1.0f, 1.0f},
+        computer_graphics::math::colors::srgb::Blue.v,
     },
     Vertex{
         computer_graphics::math::Vector3{0.5f, -0.5f, 0.0f},
-        computer_graphics::math::Color{0.0f, 1.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::srgb::Lime.v,
     },
     Vertex{
         computer_graphics::math::Vector3{-0.5f, 0.5f, 0.0f},
-        computer_graphics::math::Color{1.0f, 1.0f, 1.0f, 1.0f},
+        computer_graphics::math::colors::srgb::White.v,
     },
 };
 
