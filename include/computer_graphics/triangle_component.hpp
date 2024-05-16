@@ -28,7 +28,7 @@ class TriangleComponent : public Component {
 
   private:
     void InitializeVertexShader();
-    void InitializeIndexShader();
+    void InitializePixelShader();
     void InitializeInputLayout();
     void InitializeRasterizerState();
     void InitializeVertexBuffer(std::span<Vertex> vertices);
@@ -42,10 +42,11 @@ class TriangleComponent : public Component {
     math::Vector3 position_;
 
     detail::D3DPtr<ID3D11Buffer> index_buffer_;
-    detail::D3DPtr<ID3D11PixelShader> index_shader_;
-    detail::D3DPtr<ID3DBlob> index_byte_code_;
-
     detail::D3DPtr<ID3D11Buffer> vertex_buffer_;
+
+    detail::D3DPtr<ID3D11PixelShader> pixel_shader_;
+    detail::D3DPtr<ID3DBlob> pixel_byte_code_;
+
     detail::D3DPtr<ID3D11VertexShader> vertex_shader_;
     detail::D3DPtr<ID3DBlob> vertex_byte_code_;
 };

@@ -41,7 +41,7 @@ TriangleComponent::TriangleComponent(
     : Component{game}, position_{position} {
 
     InitializeVertexShader();
-    InitializeIndexShader();
+    InitializePixelShader();
     InitializeInputLayout();
     InitializeRasterizerState();
     InitializeVertexBuffer(vertices);
@@ -74,7 +74,7 @@ void TriangleComponent::Draw() {
         0, vertex_buffers.size(), vertex_buffers.data(),
         strides.data(), offsets.data());
     device_context->VSSetShader(vertex_shader_.Get(), nullptr, 0);
-    device_context->PSSetShader(index_shader_.Get(), nullptr, 0);
+    device_context->PSSetShader(pixel_shader_.Get(), nullptr, 0);
 
     D3D11_MAPPED_SUBRESOURCE subresource{};
     device_context->Map(
@@ -102,21 +102,21 @@ void TriangleComponent::InitializeVertexShader() {
     detail::CheckResult(result, "Failed to create vertex shader from byte code");
 }
 
-void TriangleComponent::InitializeIndexShader() {
+void TriangleComponent::InitializePixelShader() {
     std::array shader_macros{
         D3D_SHADER_MACRO{.Name = "TEST", .Definition = "1"},
         D3D_SHADER_MACRO{.Name = "TCOLOR", .Definition = "float4(0.0f, 1.0f, 0.0f, 1.0f)"},
         D3D_SHADER_MACRO{.Name = nullptr, .Definition = nullptr},
     };
 
-    index_byte_code_ =
+    pixel_byte_code_ =
         detail::CompileFromFile(
             "resources/shaders/shader.hlsl", shader_macros.data() /*macros*/, nullptr /*include*/,
             "PSMain", "ps_5_0", D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
     const HRESULT result = Device()->CreatePixelShader(
-        index_byte_code_->GetBufferPointer(), index_byte_code_->GetBufferSize(),
-        nullptr, &index_shader_);
+        pixel_byte_code_->GetBufferPointer(), pixel_byte_code_->GetBufferSize(),
+        nullptr, &pixel_shader_);
     detail::CheckResult(result, "Failed to create index shader from byte code");
 }
 
