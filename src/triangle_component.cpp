@@ -15,7 +15,7 @@ namespace detail {
 
 D3DPtr<ID3DBlob> CompileFromFile(
     const char *path, const D3D_SHADER_MACRO *defines, ID3DInclude *include,
-    const char *entrypoint, const char *target, UINT flags_1, UINT flags_2) {
+    const char *entrypoint, const char *target, const UINT flags_1, const UINT flags_2) {
 
     D3DPtr<ID3DBlob> shader;
     D3DPtr<ID3DBlob> error_messages;
@@ -168,7 +168,7 @@ void TriangleComponent::InitializeVertexBuffer(std::span<Vertex> vertices) {
         .MiscFlags = 0,
         .StructureByteStride = 0,
     };
-    D3D11_SUBRESOURCE_DATA initial_data{
+    const D3D11_SUBRESOURCE_DATA initial_data{
         .pSysMem = vertices.data(),
         .SysMemPitch = 0,
         .SysMemSlicePitch = 0,

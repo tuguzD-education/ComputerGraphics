@@ -94,7 +94,7 @@ std::string Window::Title() const {
     return detail::TCharToMultiByte(CP_UTF8, 0, title);
 }
 
-bool Window::Title(std::string_view title) {
+bool Window::Title(const std::string_view title) {
     const std::basic_string<TCHAR> t_title = detail::MultiByteToTChar(CP_UTF8, 0, title);
     const LPCTSTR c_title = t_title.c_str();
     return SetWindowText(handle_, c_title);
