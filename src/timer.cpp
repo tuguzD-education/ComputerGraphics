@@ -24,10 +24,8 @@ void Timer::Tick() {
 
     frame_count_ += 1;
     constexpr auto second = std::chrono::seconds{1};
-    const Duration time_from_previous_frame = current_ - previous_frame_;
-
-    if (time_from_previous_frame > second) {
-        frames_per_second_ = static_cast<float>(frame_count_) / SecondsFrom(time_from_previous_frame);
+    if (const Duration from_previous_frame = current_ - previous_frame_; from_previous_frame > second) {
+        frames_per_second_ = static_cast<float>(frame_count_) / SecondsFrom(from_previous_frame);
         previous_frame_ += second;
         frame_count_ = 0;
     }

@@ -48,10 +48,10 @@ float BoxComponent::Height() const {
     return height_;
 }
 
-BoxComponent::Box BoxComponent::Collision() const {
+math::Box BoxComponent::Collision() const {
     const math::Vector3 center = Position();
     const auto extents = math::Vector3{Width() / 2, Height() / 2, 0.0f};
-    return Box{center, extents};
+    return math::Box{center, extents};
 }
 
 }  // namespace computer_graphics

@@ -24,7 +24,7 @@ class Game {
     virtual ~Game();
 
     [[nodiscard]] const Timer::Duration &TimePerUpdate() const;
-    void TimePerUpdate(Timer::Duration time_per_update);
+    [[nodiscard]] Timer::Duration &TimePerUpdate();
 
     [[nodiscard]] const math::Color &ClearColor() const;
     [[nodiscard]] math::Color &ClearColor();
@@ -54,6 +54,7 @@ class Game {
     void InitializeSwapChain(const class Window &window);
     void InitializeRenderTargetView();
 
+    void UpdateInternal(float delta_time);
     void DrawInternal();
 
     [[nodiscard]] std::span<std::unique_ptr<Component>> Components();

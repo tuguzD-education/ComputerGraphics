@@ -31,8 +31,8 @@ const Timer::Duration &Game::TimePerUpdate() const {
     return time_per_update_;
 }
 
-void Game::TimePerUpdate(Timer::Duration time_per_update) {
-    time_per_update_ = time_per_update;
+Timer::Duration &Game::TimePerUpdate() {
+    return time_per_update_;
 }
 
 const math::Color &Game::ClearColor() const {
@@ -87,7 +87,7 @@ void Game::Run() {
 
         while (lag >= time_per_update_) {
             const float delta_time = Timer::SecondsFrom(time_per_update_);
-            Update(delta_time);
+            UpdateInternal(delta_time);
             lag -= time_per_update_;
         }
 
@@ -173,6 +173,10 @@ void Game::InitializeRenderTargetView() {
 
     result = device_->CreateRenderTargetView(resource.Get(), nullptr, &render_target_view_);
     detail::CheckResult(result, "Failed to create render target view");
+}
+
+void Game::UpdateInternal(const float delta_time) {
+    Update(delta_time);
 }
 
 void Game::Update(const float delta_time) {

@@ -1,6 +1,7 @@
 #ifndef MATH_HPP_INCLUDED
 #define MATH_HPP_INCLUDED
 
+#include <DirectXCollision.h>
 #include <DirectXColors.h>
 #include <SimpleMath.h>
 
@@ -26,6 +27,8 @@ using Viewport = DirectX::SimpleMath::Viewport;
 using Plane = DirectX::SimpleMath::Plane;
 using Ray = DirectX::SimpleMath::Ray;
 using Rectangle = DirectX::SimpleMath::Rectangle;
+
+using Box = DirectX::BoundingBox;
 
 }  // namespace computer_graphics::math
 
