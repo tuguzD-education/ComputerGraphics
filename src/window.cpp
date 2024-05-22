@@ -8,8 +8,10 @@
 
 namespace computer_graphics {
 
-Window::Window(const std::string_view name, const LONG width, const LONG height, HINSTANCE instance_handle)
-    : input_{}, is_destroyed_{} {
+Window::Window(
+    const std::string_view name, const std::int32_t width, const std::int32_t height,
+    const std::int32_t min_width, const std::int32_t min_height, HINSTANCE instance_handle)
+: is_destroyed_{}, min_width_{min_width}, min_height_{min_height}, input_{} {
     instance_handle = (instance_handle != nullptr) ? instance_handle : GetModuleHandle(nullptr);
 
     const std::basic_string<TCHAR> t_name = detail::MultiByteToTChar(CP_UTF8, 0, name);
@@ -39,11 +41,9 @@ Window::Window(const std::string_view name, const LONG width, const LONG height,
     AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
 
     handle_ = CreateWindowEx(
-        WS_EX_APPWINDOW, c_name, c_name,
-        WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_THICKFRAME,
+        WS_EX_APPWINDOW, c_name, c_name, WS_OVERLAPPEDWINDOW,
         (GetSystemMetrics(SM_CXSCREEN) - width) / 2, (GetSystemMetrics(SM_CYSCREEN) - height) / 2,
-        rect.right - rect.left, rect.bottom - rect.top,
-        nullptr, nullptr, instance_handle, this);
+        rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, instance_handle, this);
 
     ShowWindow(handle_, SW_SHOW);
     SetForegroundWindow(handle_);
@@ -79,6 +79,22 @@ math::Rectangle Window::ClientDimensions() const {
     return math::Rectangle{rect};
 }
 
+std::int32_t Window::MinWidth() const {
+    return min_width_;
+}
+
+std::int32_t &Window::MinWidth() {
+    return min_width_;
+}
+
+std::int32_t Window::MinHeight() const {
+    return min_height_;
+}
+
+std::int32_t &Window::MinHeight() {
+    return min_height_;
+}
+
 bool Window::IsDestroyed() const {
     return is_destroyed_;
 }
@@ -89,18 +105,28 @@ bool Window::IsFocused() const {
 
 std::string Window::Title() const {
     const auto size = GetWindowTextLength(handle_);
-    std::basic_string<TCHAR> title(size, TEXT('\0'));
+    std::basic_string title(size, TEXT('\0'));
     GetWindowText(handle_, title.data(), size + 1);
     return detail::TCharToMultiByte(CP_UTF8, 0, title);
 }
 
+// ReSharper disable once CppMemberFunctionMayBeConst
 bool Window::Title(const std::string_view title) {
     const std::basic_string<TCHAR> t_title = detail::MultiByteToTChar(CP_UTF8, 0, title);
     const LPCTSTR c_title = t_title.c_str();
     return SetWindowText(handle_, c_title);
 }
 
-void Window::ProcessQueueMessages() const {
+const OnWindowResize &Window::OnResize() const {
+    return on_resize_;
+}
+
+OnWindowResize &Window::OnResize() {
+    return on_resize_;
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void Window::ProcessQueueMessages() {
     MSG msg;
     while (PeekMessage(&msg, handle_, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -108,13 +134,15 @@ void Window::ProcessQueueMessages() const {
     }
 }
 
-void Window::Destroy() const {
+// ReSharper disable once CppMemberFunctionMayBeConst
+void Window::Destroy() {
     if (IsDestroyed()) {
         return;
     }
     DestroyWindow(handle_);
 }
 
+// ReSharper disable once CppParameterMayBeConst
 LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM w_param, const LPARAM l_param) {
     Window *window;
     if (u_message == WM_NCCREATE) {
@@ -133,24 +161,25 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
             if (input == nullptr) break;
             if (!window->IsFocused()) break;
 
-            static std::vector<BYTE> lpb;
+            static std::vector<BYTE> raw_input_bytes;
 
             UINT size;
             const auto h_raw_input = reinterpret_cast<HRAWINPUT>(l_param);
-            UINT result = ::GetRawInputData(
+            UINT result = GetRawInputData(
                 h_raw_input, RID_INPUT, nullptr, &size, sizeof(RAWINPUTHEADER));
             if (result) {
                 throw std::runtime_error{"Failed to obtain raw input"};
             }
 
-            lpb.reserve(size);
-            result = ::GetRawInputData(
-                h_raw_input, RID_INPUT, lpb.data(), &size, sizeof(RAWINPUTHEADER));
+            raw_input_bytes.reserve(size);
+            result = GetRawInputData(
+                h_raw_input, RID_INPUT, raw_input_bytes.data(), &size, sizeof(RAWINPUTHEADER));
             if (result != size) {
                 throw std::runtime_error{"Failed to obtain raw input: GetRawInputData does not return correct size"};
             }
 
-            const auto raw_input = reinterpret_cast<RAWINPUT *>(lpb.data());
+            // ReSharper disable once CppTooWideScopeInitStatement
+            const auto raw_input = reinterpret_cast<RAWINPUT *>(raw_input_bytes.data());
             switch (raw_input->header.dwType) {
                 case RIM_TYPEKEYBOARD: {
                     input->OnRawKeyboard(raw_input->data.keyboard);
@@ -165,11 +194,25 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
                 }
             }
 
-            lpb.clear();
+            raw_input_bytes.clear();
+            break;
+        }
+        case WM_GETMINMAXINFO: {
+            const auto min_max_info = reinterpret_cast<LPMINMAXINFO>(l_param);
+            min_max_info->ptMinTrackSize = {
+                .x = window->min_width_,
+                .y = window->min_height_,
+            };
+            break;
+        }
+        case WM_SIZE: {
+            const std::int32_t width = LOWORD(l_param);
+            const std::int32_t height = HIWORD(l_param);
+            window->on_resize_.Broadcast(WindowResizeData{width, height});
             break;
         }
         case WM_CLOSE: {
-            DestroyWindow(h_wnd);
+            window->Destroy();
             break;
         }
         case WM_DESTROY: {
