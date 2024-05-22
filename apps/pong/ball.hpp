@@ -47,8 +47,8 @@ inline void Ball::Update(const float delta_time) {
             continue;
         }
 
-        Box box = Collision();
-        Box player_box = player->Collision();
+        computer_graphics::math::Box box = Collision();
+        computer_graphics::math::Box player_box = player->Collision();
         if (box.Intersects(player_box)) {
             velocity_.x = -velocity_.x;
         }
