@@ -7,7 +7,7 @@
 
 class Game final : public computer_graphics::Game {
   public:
-    explicit Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device);
+    explicit Game(computer_graphics::Window &window, computer_graphics::Input &input);
 
   protected:
     void Draw() override;
@@ -19,8 +19,8 @@ class Game final : public computer_graphics::Game {
     std::string initial_title_;
 };
 
-inline Game::Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device)
-    : computer_graphics::Game(window, input_device) {}
+inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
+    : computer_graphics::Game(window, input) {}
 
 inline void Game::Draw() {
     computer_graphics::Game::Draw();

@@ -4,12 +4,12 @@
 #include <vector>
 
 #include "computer_graphics/detail/string_api_set.hpp"
-#include "computer_graphics/input_device.hpp"
+#include "computer_graphics/input.hpp"
 
 namespace computer_graphics {
 
 Window::Window(const std::string_view name, const LONG width, const LONG height, HINSTANCE instance_handle)
-    : input_device_{}, is_destroyed_{} {
+    : input_{}, is_destroyed_{} {
     instance_handle = (instance_handle != nullptr) ? instance_handle : GetModuleHandle(nullptr);
 
     const std::basic_string<TCHAR> t_name = detail::MultiByteToTChar(CP_UTF8, 0, name);
@@ -124,19 +124,14 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
     } else {
         window = reinterpret_cast<Window *>(GetWindowLongPtr(h_wnd, GWLP_USERDATA));
     }
-    if (!window) {
+    if (!window)
         return DefWindowProc(h_wnd, u_message, w_param, l_param);
-    }
 
     switch (u_message) {
         case WM_INPUT: {
-            InputDevice *input_device = window->input_device_;
-            if (input_device == nullptr) {
-                break;
-            }
-            if (!window->IsFocused()) {
-                break;
-            }
+            Input *input = window->input_;
+            if (input == nullptr) break;
+            if (!window->IsFocused()) break;
 
             static std::vector<BYTE> lpb;
 
@@ -158,11 +153,11 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
             const auto raw_input = reinterpret_cast<RAWINPUT *>(lpb.data());
             switch (raw_input->header.dwType) {
                 case RIM_TYPEKEYBOARD: {
-                    input_device->OnRawKeyboard(raw_input->data.keyboard);
+                    input->OnRawKeyboard(raw_input->data.keyboard);
                     break;
                 }
                 case RIM_TYPEMOUSE: {
-                    input_device->OnRawMouse(raw_input->data.mouse);
+                    input->OnRawMouse(raw_input->data.mouse);
                     break;
                 }
                 default: {

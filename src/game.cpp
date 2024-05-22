@@ -12,9 +12,9 @@ namespace computer_graphics {
 
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
-Game::Game(class Window &window, InputDevice &input_device)
+Game::Game(class Window &window, Input &input)
     : time_per_update_{default_time_per_update},
-      input_device_{input_device},
+      input_{input},
       window_{window},
       target_width_{},
       target_height_{},

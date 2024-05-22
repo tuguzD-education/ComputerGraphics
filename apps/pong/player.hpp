@@ -46,14 +46,12 @@ inline Team Player::Team() const {
 }
 
 inline void Player::Update(const float delta_time) {
-    const auto *input_device = InputDevice();
-    if (input_device == nullptr) {
-        return;
-    }
+    const auto *input = Input();
+    if (input == nullptr) return;
 
     auto &position = Position();
     const auto y = static_cast<float>(
-        input_device->IsKeyDown(controls_.up) - input_device->IsKeyDown(controls_.down));
+        input->IsKeyDown(controls_.up) - input->IsKeyDown(controls_.down));
     const computer_graphics::math::Vector3 movement = computer_graphics::math::Vector3::Up * y;
     constexpr float speed = 2.0f;
     position += speed * movement * delta_time;

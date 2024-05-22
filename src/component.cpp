@@ -6,12 +6,12 @@ Component::Component(Game &game) : game_{game} {}
 
 Component::~Component() = default;
 
-InputDevice *Component::InputDevice() {
-    return &game_.get().input_device_;
+Input *Component::Input() {
+    return &game_.get().input_;
 }
 
-const InputDevice *Component::InputDevice() const {
-    return &game_.get().input_device_;
+const Input *Component::Input() const {
+    return &game_.get().input_;
 }
 
 Window *Component::Window() {

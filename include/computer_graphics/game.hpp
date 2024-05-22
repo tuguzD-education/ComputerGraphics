@@ -20,7 +20,7 @@ class Game {
     friend class Component;
 
   public:
-    explicit Game(Window &window, InputDevice &input_device);
+    explicit Game(Window &window, Input &input);
     virtual ~Game();
 
     [[nodiscard]] const Timer::Duration &TimePerUpdate() const;
@@ -61,7 +61,7 @@ class Game {
     class Timer timer_;
     Timer::Duration time_per_update_;
 
-    InputDevice &input_device_;
+    Input &input_;
 
     class Window &window_;
     UINT target_width_;

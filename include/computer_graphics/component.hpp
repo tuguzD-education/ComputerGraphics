@@ -18,8 +18,8 @@ class Component {
     virtual void Draw() = 0;
 
   protected:
-    [[nodiscard]] InputDevice *InputDevice();
-    [[nodiscard]] const computer_graphics::InputDevice *InputDevice() const;
+    [[nodiscard]] Input *Input();
+    [[nodiscard]] const computer_graphics::Input *Input() const;
 
     [[nodiscard]] Window *Window();
     [[nodiscard]] const computer_graphics::Window *Window() const;

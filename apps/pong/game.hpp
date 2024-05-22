@@ -10,7 +10,7 @@
 
 class Game final : public computer_graphics::Game {
   public:
-    explicit Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device);
+    explicit Game(computer_graphics::Window &window, computer_graphics::Input &input);
 
   protected:
     void Update(float delta_time) override;
@@ -28,8 +28,8 @@ class Game final : public computer_graphics::Game {
     Player *won_player = nullptr;
 };
 
-inline Game::Game(computer_graphics::Window &window, computer_graphics::InputDevice &input_device)
-    : computer_graphics::Game(window, input_device),
+inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
+    : computer_graphics::Game(window, input),
       ball_{AddComponent<Ball>()},
       red_player_{AddComponent<Player>(
           computer_graphics::math::colors::srgb::Red.v,

@@ -34,12 +34,12 @@ class Window {
     void Destroy() const;
 
   private:
-    friend class InputDevice;
+    friend class Input;
 
     static LRESULT CALLBACK WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param);
 
     HWND handle_;
-    InputDevice *input_device_;
+    Input *input_;
     bool is_destroyed_;
 };
 
