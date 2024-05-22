@@ -1,2 +1,2 @@
-add_subdirectory(test)
-add_subdirectory(pong)
+add_subdirectory(1_test)
+add_subdirectory(2_pong)
