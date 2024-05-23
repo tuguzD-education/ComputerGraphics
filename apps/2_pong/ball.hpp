@@ -11,7 +11,7 @@
 
 class Ball final : public computer_graphics::BoxComponent {
   public:
-    explicit Ball(computer_graphics::Game &game);
+    explicit Ball(computer_graphics::Game &game, const Initializer &initializer = {});
 
     void Reset(const Player *won_player = nullptr);
 
@@ -23,8 +23,18 @@ class Ball final : public computer_graphics::BoxComponent {
     computer_graphics::math::Vector3 velocity_;
 };
 
-inline Ball::Ball(computer_graphics::Game &game) : BoxComponent(
-    game, Initializer{.length = 0.05f, .height = 0.05f, .width = 0.05f}), velocity_{RandomVelocity()} {}
+inline Ball::Ball(computer_graphics::Game &game, const Initializer &initializer) : BoxComponent(
+    game, [initializer] {
+          Initializer new_initializer{initializer};
+          new_initializer.length = 0.05f;
+          new_initializer.height = 0.05f;
+          new_initializer.width = 0.05f;
+          return new_initializer;
+      }()), velocity_{RandomVelocity()} {
+    if (initializer.name == "component") {
+        Name() = "ball";
+    }
+}
 
 inline void Ball::Reset(const Player *won_player) {
     Transform().position = computer_graphics::math::Vector3{};

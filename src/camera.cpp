@@ -50,7 +50,11 @@ Camera::Camera(class Game& game, const Initializer& initializer)
       height_{initializer.height},
       near_plane_{initializer.near_plane},
       far_plane_{initializer.far_plane},
-      projection_type_{initializer.projection_type} {}
+      projection_type_{initializer.projection_type} {
+    if (initializer.name == "scene_component") {
+        Name() = "camera";
+    }
+}
 
 const CameraProjectionType& Camera::ProjectionType() const {
     return projection_type_;

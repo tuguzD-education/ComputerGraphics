@@ -5,7 +5,11 @@
 
 namespace computer_graphics {
 
-ViewportManager::ViewportManager(class Game &game, const Initializer &initializer) : Component(game, initializer) {}
+ViewportManager::ViewportManager(class Game &game, const Initializer &initializer) : Component(game, initializer) {
+    if (initializer.name == "component") {
+        Name() = "viewport_manager";
+    }
+}
 
 const Viewport &ViewportManager::TargetViewport() const {
     return target_viewport_;

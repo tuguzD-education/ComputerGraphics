@@ -6,6 +6,7 @@
 #include <d3d11.h>
 
 #include <functional>
+#include <string>
 
 namespace computer_graphics {
 
@@ -14,10 +15,15 @@ class Camera;
 
 class Component {
   public:
-    struct Initializer {};
+    struct Initializer {
+        std::string name = "component";
+    };
 
     explicit Component(Game &game, const Initializer &initializer = {});
     virtual ~Component();
+
+    [[nodiscard]] std::string &Name();
+    [[nodiscard]] const std::string &Name() const;
 
     virtual void Update(float delta_time);
     virtual void Draw(const Camera *camera);
@@ -35,6 +41,8 @@ class Component {
 
   private:
     std::reference_wrapper<class Game> game_;
+
+    std::string name_;
 };
 
 }  // namespace computer_graphics

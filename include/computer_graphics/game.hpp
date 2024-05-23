@@ -71,6 +71,8 @@ class Game {
     [[nodiscard]] ConstComponentRange auto Components() const;
     [[nodiscard]] ComponentRange auto Components();
 
+    void Hierarchy() const;
+
     void Run();
     void Exit();
 

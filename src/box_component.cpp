@@ -226,6 +226,9 @@ BoxComponent::BoxComponent(class Game &game, const Initializer &initializer)
       length_{initializer.length},
       height_{initializer.height},
       width_{initializer.width} {
+    if (initializer.name == "component") {
+        Name() = "box_component";
+    }
     const std::array vertices = detail::BoxVertices(length_, height_, width_, initializer.color);
     const std::array indices = detail::BoxIndices();
     Load(vertices, indices);

@@ -4,7 +4,7 @@
 
 namespace computer_graphics {
 
-Component::Component(class Game &game, [[maybe_unused]] const Initializer &initializer) : game_{game} {}
+Component::Component(class Game &game, const Initializer &initializer) : game_{game}, name_{initializer.name} {}
 
 Component::~Component() = default;
 
@@ -36,6 +36,14 @@ ID3D11Device &Component::Device() {
 
 const ID3D11Device &Component::Device() const {
     return *Game().device_.Get();
+}
+
+std::string &Component::Name() {
+    return name_;
+}
+
+const std::string &Component::Name() const {
+    return name_;
 }
 
 }  // namespace computer_graphics

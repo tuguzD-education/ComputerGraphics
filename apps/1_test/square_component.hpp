@@ -8,7 +8,7 @@
 
 class SquareComponent final : public computer_graphics::TriangleComponent {
   public:
-    explicit SquareComponent(computer_graphics::Game &game);
+    explicit SquareComponent(computer_graphics::Game &game, const Initializer &initializer = {});
 };
 
 namespace detail {
@@ -44,7 +44,16 @@ constexpr std::array<SquareComponent::Index, 6> indices{0, 1, 2, 1, 0, 3};
 
 }  // namespace detail
 
-inline SquareComponent::SquareComponent(computer_graphics::Game &game)
-    : TriangleComponent(game, Initializer{.vertices = detail::vertices, .indices = detail::indices}) {}
+inline SquareComponent::SquareComponent(computer_graphics::Game &game, const Initializer &initializer)
+    : TriangleComponent(game, [initializer] {
+          Initializer new_initializer{initializer};
+          new_initializer.vertices = detail::vertices;
+          new_initializer.indices = detail::indices;
+          return new_initializer;
+      }()) {
+    if (initializer.name == "component") {
+        Name() = "square_component";
+    }
+}
 
 #endif  // SQUARE_COMPONENT_HPP_INCLUDED

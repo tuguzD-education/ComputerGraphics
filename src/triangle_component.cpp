@@ -31,6 +31,10 @@ TriangleComponent::TriangleComponent(class Game &game, const Initializer &initia
     InitializeRasterizerState();
 
     Load(initializer.vertices, initializer.indices);
+
+    if (initializer.name == "component") {
+        Name() = "triangle_component";
+    }
 }
 
 void TriangleComponent::Load(const std::span<const Vertex> vertices, const std::span<const Index> indices) {

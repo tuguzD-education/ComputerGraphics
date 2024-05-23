@@ -1,6 +1,7 @@
 #include "computer_graphics/game.hpp"
 
 #include <array>
+#include <iostream>
 
 #include "computer_graphics/camera.hpp"
 #include "computer_graphics/camera_manager.hpp"
@@ -153,6 +154,25 @@ Input *Game::Input() {
 
 bool Game::IsRunning() const {
     return is_running_;
+}
+
+void Game::Hierarchy() const {
+    std::cout << std::endl;
+    if (camera_manager_ != nullptr) {
+        std::cout << camera_manager_->Name() << std::endl;
+        if (MainCamera() != nullptr) {
+            std::cout << "\t" + MainCamera()->Name() << std::endl;
+        }
+    }
+    std::cout << viewport_manager_->Name() +
+        " (" + std::to_string(viewport_manager_->Viewports().size()) + ")" << std::endl;
+
+    std::cout << "scene" << std::endl;
+
+    for (const auto &component : components_) {
+        std::cout << "\t" + component->Name() << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 void Game::Run() {

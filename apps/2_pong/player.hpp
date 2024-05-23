@@ -4,8 +4,8 @@
 #define PONG_PLAYER_HPP_INCLUDED
 
 #include <computer_graphics/box_component.hpp>
-#include <computer_graphics/input_key.hpp>
 #include <computer_graphics/game.hpp>
+#include <computer_graphics/input_key.hpp>
 
 #include "team.hpp"
 
@@ -16,8 +16,12 @@ class Player final : public computer_graphics::BoxComponent {
         computer_graphics::InputKey down;
     };
 
-    explicit Player(
-        computer_graphics::Game &game, computer_graphics::math::Color color, Team team, ControlKeys controls);
+    struct Initializer : BoxComponent::Initializer {
+        Team team;
+        ControlKeys controls;
+    };
+
+    explicit Player(computer_graphics::Game &game, const Initializer &initializer = {});
 
     [[nodiscard]] Team Team() const;
     [[nodiscard]] ControlKeys Controls() const;
@@ -33,18 +37,22 @@ class Player final : public computer_graphics::BoxComponent {
     static computer_graphics::math::Vector3 PositionFrom(::Team team);
 };
 
-inline Player::Player(
-    computer_graphics::Game &game, const computer_graphics::math::Color color,
-    const ::Team team, const ControlKeys controls)
-: BoxComponent(game, [&] {
-                   Initializer initializer{
-                       .length = 0.05f, .height = 0.3f,
-                       .width = 0.05f, .color = color
-                   };
-                   initializer.Transform({.position = PositionFrom(team)});
-                   return initializer;
-               }()),
-      team_{team}, controls_{controls} {}
+inline Player::Player(computer_graphics::Game &game, const Initializer &initializer)
+    : BoxComponent(game,
+                   [&] {
+                       Initializer initializer_{initializer};
+                       initializer_.length = 0.05f;
+                       initializer_.height = 0.3f;
+                       initializer_.width = 0.05f;
+                       initializer_.transform.position = PositionFrom(initializer.team);
+                       return initializer_;
+                   }()),
+      team_{initializer.team},
+      controls_{initializer.controls} {
+    if (initializer.name == "component") {
+        Name() = "pong_player";
+    }
+}
 
 inline Team Player::Team() const {
     return team_;
@@ -65,8 +73,7 @@ inline void Player::Update(const float delta_time) {
     if (input == nullptr) return;
 
     auto &position = Transform().position;
-    const auto y = static_cast<float>(
-        input->IsKeyDown(controls_.up) - input->IsKeyDown(controls_.down));
+    const auto y = static_cast<float>(input->IsKeyDown(controls_.up) - input->IsKeyDown(controls_.down));
     const math::Vector3 movement = math::Vector3::Up * y;
     constexpr float speed = 2.0f;
     position += speed * movement * delta_time;

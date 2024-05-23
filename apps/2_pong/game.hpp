@@ -32,20 +32,36 @@ class Game final : public computer_graphics::Game {
 
 inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
     : computer_graphics::Game(window, input),
-      initial_title_{window.Title()}, red_score_{}, blue_score_{},
-      ball_{AddComponent<Ball>()},
-      red_player_{AddComponent<Player>(
-          computer_graphics::math::colors::srgb::Red.v,
-          Team::Red, Player::ControlKeys{
+      initial_title_{window.Title()},
+      red_score_{},
+      blue_score_{},
+      ball_{AddComponent<Ball>([] {
+          Ball::Initializer initializer{};
+          initializer.name = "white_ball";
+          return initializer;
+      }())},
+      red_player_{AddComponent<Player>([] {
+          Player::Initializer initializer{};
+          initializer.name = "red_player";
+          initializer.color = computer_graphics::math::colors::linear::Red;
+          initializer.team = Team::Red;
+          initializer.controls = Player::ControlKeys{
               .up = computer_graphics::InputKey::W,
               .down = computer_graphics::InputKey::S,
-          })},
-      blue_player_{AddComponent<Player>(
-          computer_graphics::math::colors::srgb::Blue.v, Team::Blue,
-          Player::ControlKeys{
+          };
+          return initializer;
+      }())},
+      blue_player_{AddComponent<Player>([] {
+          Player::Initializer initializer{};
+          initializer.name = "blue_player";
+          initializer.color = computer_graphics::math::colors::linear::Blue;
+          initializer.team = Team::Blue;
+          initializer.controls = Player::ControlKeys{
               .up = computer_graphics::InputKey::Up,
               .down = computer_graphics::InputKey::Down,
-          })} {
+          };
+          return initializer;
+      }())} {
     input.OnInputKeyDown().AddRaw(this, &Game::OnKeyDown);
 }
 
@@ -74,8 +90,7 @@ inline void Game::Draw() {
     computer_graphics::Game::Draw();
 
     std::string title = initial_title_;
-    std::format_to(
-        std::back_inserter(title), " [ Red: {} | Blue: {} ]", red_score_, blue_score_);
+    std::format_to(std::back_inserter(title), " [ Red: {} | Blue: {} ]", red_score_, blue_score_);
     Window()->Title(title);
 }
 

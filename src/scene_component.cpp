@@ -13,7 +13,11 @@ auto SceneComponent::Initializer::Parent(const SceneComponent *parent) -> Initia
 }
 
 SceneComponent::SceneComponent(class Game &game, const Initializer &initializer)
-    : Component(game), transform_{initializer.transform}, parent_{initializer.parent} {}
+    : Component(game, initializer), transform_{initializer.transform}, parent_{initializer.parent} {
+    if (initializer.name == "component") {
+        Name() = "scene_component";
+    }
+}
 
 const Transform &SceneComponent::Transform() const {
     return transform_;
@@ -23,7 +27,7 @@ Transform &SceneComponent::Transform() {
     return transform_;
 }
 
-Transform SceneComponent::WorldTransform() const {
+Transform SceneComponent::WorldTransform() const { // NOLINT(*-no-recursion)
     class Transform world_current = transform_;
     if (parent_ != nullptr) {
         const class Transform world_parent = parent_->WorldTransform();

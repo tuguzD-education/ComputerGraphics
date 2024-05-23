@@ -2,7 +2,11 @@
 
 namespace computer_graphics {
 
-CameraManager::CameraManager(class Game &game, const Initializer &initializer) : Component(game, initializer) {}
+CameraManager::CameraManager(class Game &game, const Initializer &initializer) : Component(game, initializer) {
+    if (initializer.name == "component") {
+        Name() = "camera_manager";
+    }
+}
 
 const Camera *CameraManager::MainCamera() const {
     return nullptr;
