@@ -6,11 +6,7 @@ int main() {
     computer_graphics::Input input{window};
 
     Game game{window, input};
-    game.AddComponent<SquareComponent>([] {
-        SquareComponent::Initializer initializer{};
-        initializer.name = "plane";
-        return initializer;
-    }());
+    game.AddComponent<SquareComponent>();
 
     game.Run();
     return 0;
