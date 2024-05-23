@@ -5,7 +5,7 @@
 
 #include <unordered_set>
 
-#include "delegates.hpp"
+#include "delegate/multicast_delegate.hpp"
 #include "input_key.hpp"
 #include "window.hpp"
 
@@ -21,22 +21,11 @@ struct RawMouse {
     InputKey input_key;
     std::uint32_t flag_down;
     std::uint32_t flag_up;
-} constexpr raw_mouse_[]{
-    {InputKey::LeftButton, RI_MOUSE_LEFT_BUTTON_DOWN, RI_MOUSE_LEFT_BUTTON_UP},
-    {InputKey::RightButton, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_UP},
-    {InputKey::MiddleButton, RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_MIDDLE_BUTTON_UP},
 };
 
 struct RawKeyboard {
     InputKey input_key;
     std::atomic_ushort code;
-} constexpr raw_keyboard_[]{
-    {InputKey::LeftControl, 0x001D},
-    {InputKey::RightControl, 0xE01D},
-    {InputKey::LeftShift, 0x002A},
-    {InputKey::RightShift, 0x0036},
-    {InputKey::LeftAlt, 0x0038},
-    {InputKey::RightAlt, 0xE038},
 };
 
 DECLARE_MULTICAST_DELEGATE(OnMouseMove, const MouseMoveData &);

@@ -49,7 +49,7 @@ inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &i
 inline void Game::Update(const float delta_time) {
     computer_graphics::Game::Update(delta_time);
 
-    if (const auto &x = ball_.Position().x; x < -0.975f) {
+    if (const auto &x = ball_.Transform().position.x; x < -0.975f) {
         std::cout << "One point to the BLUE!";
         won_player = &blue_player_;
         blue_score_++;

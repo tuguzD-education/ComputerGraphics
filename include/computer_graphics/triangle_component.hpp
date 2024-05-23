@@ -5,50 +5,61 @@
 
 #include <VertexTypes.h>
 
-#include <span>
-
-#include "component.hpp"
 #include "detail/d3d_ptr.hpp"
+#include "scene_component.hpp"
 
 namespace computer_graphics {
 
-class TriangleComponent : public Component {
+class TriangleComponent : public SceneComponent {
   public:
-    using Vertex = DirectX::VertexPositionColor;
-    using Index = int;
+    using Vertex = DirectX::VertexPositionNormalColorTexture;
+    using Index = std::uint32_t;
 
-    explicit TriangleComponent(
-        Game &game, std::span<Vertex> vertices, std::span<Index> indices, math::Vector3 position = {});
+    struct Initializer : SceneComponent::Initializer {
+        std::span<const Vertex> vertices;
+        std::span<const Index> indices;
 
-    [[nodiscard]] const math::Vector3 &Position() const;
-    [[nodiscard]] math::Vector3 &Position();
+        Initializer &Vertices(std::span<const Vertex> vertices);
+        Initializer &Indices(std::span<const Index> indices);
+    };
 
-    void Update(float delta_time) override;
-    void Draw() override;
+    explicit TriangleComponent(class Game &game, const Initializer &initializer = {});
 
-  private:
-    void InitializeVertexShader();
-    void InitializePixelShader();
-    void InitializeInputLayout();
-    void InitializeRasterizerState();
-    void InitializeVertexBuffer(std::span<Vertex> vertices);
-    void InitializeIndexBuffer(std::span<Index> indices);
-    void InitializeConstantBuffer(math::Vector3 position);
+    void Load(std::span<const Vertex> vertices, std::span<const Index> indices);
 
-    detail::D3DPtr<ID3D11RasterizerState> rasterizer_state_;
-    detail::D3DPtr<ID3D11InputLayout> input_layout_;
+    void Draw(const Camera *camera) override;
 
-    detail::D3DPtr<ID3D11Buffer> constant_buffer_;
-    math::Vector3 position_;
+  protected:
+    struct alignas(16) ConstantBuffer {
+        math::Matrix4x4 world;
+        math::Matrix4x4 view;
+        math::Matrix4x4 projection;
+    };
+    virtual void UpdateConstantBuffer(const ConstantBuffer &data);
 
     detail::D3DPtr<ID3D11Buffer> index_buffer_;
     detail::D3DPtr<ID3D11Buffer> vertex_buffer_;
+    detail::D3DPtr<ID3D11Buffer> constant_buffer_;
+
+    detail::D3DPtr<ID3D11RasterizerState> rasterizer_state_;
+    detail::D3DPtr<ID3D11InputLayout> input_layout_;
 
     detail::D3DPtr<ID3D11PixelShader> pixel_shader_;
     detail::D3DPtr<ID3DBlob> pixel_byte_code_;
 
     detail::D3DPtr<ID3D11VertexShader> vertex_shader_;
     detail::D3DPtr<ID3DBlob> vertex_byte_code_;
+
+  private:
+    void InitializeVertexShader();
+    void InitializePixelShader();
+    void InitializeConstantBuffer();
+
+    void InitializeInputLayout();
+    void InitializeRasterizerState();
+
+    void InitializeVertexBuffer(std::span<const Vertex> vertices);
+    void InitializeIndexBuffer(std::span<const Index> indices);
 };
 
 }  // namespace computer_graphics

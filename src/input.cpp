@@ -10,6 +10,25 @@
 
 namespace computer_graphics {
 
+namespace detail {
+
+constexpr std::array raw_mouse_{
+    RawMouse{InputKey::LeftButton, RI_MOUSE_LEFT_BUTTON_DOWN, RI_MOUSE_LEFT_BUTTON_UP},
+    RawMouse{InputKey::RightButton, RI_MOUSE_RIGHT_BUTTON_DOWN, RI_MOUSE_RIGHT_BUTTON_UP},
+    RawMouse{InputKey::MiddleButton, RI_MOUSE_MIDDLE_BUTTON_DOWN, RI_MOUSE_MIDDLE_BUTTON_UP},
+};
+
+constexpr std::array raw_keyboard_{
+    RawKeyboard{InputKey::LeftControl, 0x001D},
+    RawKeyboard{InputKey::RightControl, 0xE01D},
+    RawKeyboard{InputKey::LeftShift, 0x002A},
+    RawKeyboard{InputKey::RightShift, 0x0036},
+    RawKeyboard{InputKey::LeftAlt, 0x0038},
+    RawKeyboard{InputKey::RightAlt, 0xE038},
+};
+
+} // namespace detail
+
 Input::Input(Window &window) : window_{window} {
     std::array raw_input_devices{
         RAWINPUTDEVICE{
@@ -74,7 +93,7 @@ void Input::OnRawKeyboard(const RAWKEYBOARD &data) {
     const bool is_key_up = data.Flags & RI_KEY_BREAK;
 
     auto key = static_cast<InputKey>(data.VKey);
-    for (const auto &[input_key, code] : raw_keyboard_) {
+    for (const auto &[input_key, code] : detail::raw_keyboard_) {
         if (data.MakeCode == code) key = input_key;
     }
 
@@ -86,14 +105,14 @@ void Input::OnRawKeyboard(const RAWKEYBOARD &data) {
 }
 
 void Input::OnRawMouse(const RAWMOUSE &data) {
-    for (const auto &[input_key, flag_down, flag_up] : raw_mouse_) {
+    for (const auto &[input_key, flag_down, flag_up] : detail::raw_mouse_) {
         if (data.usButtonFlags & flag_down) AddPressedKey(input_key);
         if (data.usButtonFlags & flag_up) RemovePressedKey(input_key);
     }
 
     POINT point;
-    ::GetCursorPos(&point);
-    ::ScreenToClient(window_.RawHandle(), &point);
+    GetCursorPos(&point);
+    ScreenToClient(window_.RawHandle(), &point);
 
     const MouseMoveData mouse_move_data{
         .position = {static_cast<float>(point.x), static_cast<float>(point.y)},

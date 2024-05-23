@@ -7,7 +7,7 @@
 
 #include <string>
 
-#include "delegates.hpp"
+#include "delegate/multicast_delegate.hpp"
 #include "math.hpp"
 
 namespace computer_graphics {

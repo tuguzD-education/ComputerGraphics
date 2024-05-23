@@ -1,21 +1,19 @@
 #include "computer_graphics/game.hpp"
 
-#include <SimpleMath.h>
-
 #include <array>
-#include <format>
 
+#include "computer_graphics/camera.hpp"
+#include "computer_graphics/camera_manager.hpp"
 #include "computer_graphics/detail/check_result.hpp"
-#include "computer_graphics/triangle_component.hpp"
 
 namespace computer_graphics {
 
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
-Game::Game(class Window &window, Input &input)
-    : time_per_update_{default_time_per_update},
+Game::Game(class Window &window, class Input &input)
+    : window_{window},
       input_{input},
-      window_{window},
+      time_per_update_{default_time_per_update},
       target_width_{},
       target_height_{},
       should_exit_{},
@@ -23,9 +21,14 @@ Game::Game(class Window &window, Input &input)
     InitializeDevice();
     InitializeSwapChain(window);
     InitializeRenderTargetView();
+
+    ViewportManager<class ViewportManager>();
+    window_.OnResize().AddRaw(this, &Game::OnWindowResize);
 }
 
-Game::~Game() = default;
+Game::~Game() {
+    window_.OnResize().RemoveByOwner(this);
+}
 
 const Timer::Duration &Game::TimePerUpdate() const {
     return time_per_update_;
@@ -43,6 +46,95 @@ math::Color &Game::ClearColor() {
     return clear_color_;
 }
 
+const CameraManager *Game::CameraManager() const {
+    return camera_manager_.get();
+}
+
+CameraManager *Game::CameraManager() {
+    return camera_manager_.get();
+}
+
+void Game::RemoveCameraManager() {
+    camera_manager_ = nullptr;
+}
+
+const ViewportManager &Game::ViewportManager() const {
+    return *viewport_manager_;
+}
+
+ViewportManager &Game::ViewportManager() {
+    return *viewport_manager_;
+}
+
+const Camera *Game::MainCamera() const {
+    if (camera_manager_ == nullptr) {
+        return nullptr;
+    }
+    return camera_manager_->MainCamera();
+}
+
+Camera *Game::MainCamera() {
+    if (camera_manager_ == nullptr) {
+        return nullptr;
+    }
+    return camera_manager_->MainCamera();
+}
+
+std::uint32_t Game::TargetWidth() const {
+    return target_width_;
+}
+
+std::uint32_t Game::TargetHeight() const {
+    return target_height_;
+}
+
+math::Vector3 Game::ScreenToWorld(const math::Point screen_point) const {
+    const auto x = static_cast<float>(screen_point.x);
+    const auto y = static_cast<float>(screen_point.y);
+
+    auto contains = [x, y](const Viewport &viewport) {
+        return (viewport.x <= x && x < viewport.x + viewport.width) &&
+            (viewport.y <= y && y < viewport.y + viewport.height);
+    };
+
+    for (const Viewport &viewport : ViewportManager().Viewports()) {
+        if (!contains(viewport) || viewport.camera == nullptr) {
+            continue;
+        }
+        const math::Vector3 point{x, y, 1.0f};
+        const math::Matrix4x4 projection = viewport.camera->Projection();
+        const math::Matrix4x4 view = viewport.camera->View();
+        const math::Matrix4x4 world = math::Matrix4x4::Identity;
+        return viewport.Unproject(point, projection, view, world);
+    }
+
+    return math::Vector3{std::numeric_limits<float>::quiet_NaN()};
+}
+
+math::Point Game::WorldToScreen(const math::Vector3 position, const Viewport *viewport) const {
+    const Viewport &viewport_ref =
+        (viewport != nullptr) ? *viewport : ViewportManager().TargetViewport();
+    if (viewport_ref.camera == nullptr) {
+        return math::Point{
+            .x = -1,
+            .y = -1,
+        };
+    }
+
+    const math::Matrix4x4 projection = viewport_ref.camera->Projection();
+    const math::Matrix4x4 view = viewport_ref.camera->View();
+    const math::Matrix4x4 world = math::Matrix4x4::Identity;
+    const math::Vector3 result = viewport_ref.Project(position, projection, view, world);
+    return math::Point{
+        .x = static_cast<std::int32_t>(result.x),
+        .y = static_cast<std::int32_t>(result.y),
+    };
+}
+
+const Timer &Game::Timer() const {
+    return timer_;
+}
+
 const Window *Game::Window() const {
     return &window_;
 }
@@ -51,24 +143,16 @@ Window *Game::Window() {
     return &window_;
 }
 
-const Timer &Game::Timer() const {
-    return timer_;
+const Input *Game::Input() const {
+    return &input_;
 }
 
-Timer &Game::Timer() {
-    return timer_;
+Input *Game::Input() {
+    return &input_;
 }
 
 bool Game::IsRunning() const {
     return is_running_;
-}
-
-std::span<const std::unique_ptr<Component>> Game::Components() const {
-    return components_;
-}
-
-std::span<std::unique_ptr<Component>> Game::Components() {
-    return components_;
 }
 
 void Game::Run() {
@@ -177,6 +261,11 @@ void Game::InitializeRenderTargetView() {
 
 void Game::UpdateInternal(const float delta_time) {
     Update(delta_time);
+
+    if (camera_manager_ != nullptr) {
+        camera_manager_->Update(delta_time);
+    }
+    viewport_manager_->Update(delta_time);
 }
 
 void Game::Update(const float delta_time) {
@@ -185,33 +274,26 @@ void Game::Update(const float delta_time) {
     }
 }
 
-void Game::Draw() {
-    for (const auto &component : components_) {
-        component->Draw();
-    }
-}
-
 void Game::DrawInternal() {
     device_context_->ClearState();
-
-    const D3D11_VIEWPORT viewport{
-        .TopLeftX = 0.0f,
-        .TopLeftY = 0.0f,
-        .Width = static_cast<FLOAT>(target_width_),
-        .Height = static_cast<FLOAT>(target_height_),
-        .MinDepth = 0.0f,
-        .MaxDepth = 1.0f,
-    };
-    const std::array viewports{viewport};
-    device_context_->RSSetViewports(viewports.size(), viewports.data());
 
     const std::array render_targets{render_target_view_.Get()};
     device_context_->OMSetRenderTargets(
         render_targets.size(), render_targets.data(), nullptr);
-
     device_context_->ClearRenderTargetView(render_target_view_.Get(), clear_color_);
 
+    for (const auto &viewport : viewport_manager_->Viewports()) {
+        device_context_->RSSetViewports(1, viewport.Get11());
+
+        const Camera *camera = viewport.camera;
+        Draw(camera);
+    }
     Draw();
+
+    if (camera_manager_ != nullptr) {
+        camera_manager_->Draw(nullptr);
+    }
+    viewport_manager_->Draw(nullptr);
 
     constexpr std::array<ID3D11RenderTargetView *, 0> no_render_targets{};
     device_context_->OMSetRenderTargets(
@@ -219,6 +301,37 @@ void Game::DrawInternal() {
 
     const HRESULT result = swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
     detail::CheckResult(result, "Failed to present to swap chain");
+}
+
+void Game::Draw() {}
+
+void Game::Draw(const Camera *camera) {
+    for (const auto &component : components_) {
+        component->Draw(camera);
+    }
+}
+
+void Game::OnTargetResize() {
+    render_target_view_.Reset();
+    if (swap_chain_ != nullptr) {
+        const HRESULT result = swap_chain_->ResizeBuffers(
+            0, 0, 0, DXGI_FORMAT_UNKNOWN, 0);
+        detail::CheckResult(result, "Failed to resize swap chain buffers");
+    }
+    InitializeRenderTargetView();
+
+    if (camera_manager_ != nullptr) {
+        camera_manager_->OnTargetResize();
+    }
+    viewport_manager_->OnTargetResize();
+
+    for (const auto &component : components_) {
+        component->OnTargetResize();
+    }
+}
+
+void Game::OnWindowResize([[maybe_unused]] WindowResizeData data) {
+    OnTargetResize();
 }
 
 }  // namespace computer_graphics

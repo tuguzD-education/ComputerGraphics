@@ -16,7 +16,7 @@ void CheckResult(const HRESULT result, F &&factory) {
     if (FAILED(result)) {
         std::string message = factory();
 
-        _com_error error{result};
+        const _com_error error{result};
         if (!message.empty()) {
             message.append("\ncause: ");
         }

@@ -3,22 +3,25 @@
 #ifndef GAME_HPP_INCLUDED
 #define GAME_HPP_INCLUDED
 
-#include <d3d11.h>
-
 #include <memory>
-#include <span>
 #include <vector>
 
+#include "camera_manager.hpp"
+#include "concepts.hpp"
 #include "detail/d3d_ptr.hpp"
+#include "input.hpp"
 #include "timer.hpp"
-#include "window.hpp"
+#include "viewport_manager.hpp"
 
 namespace computer_graphics {
 
-class Game {
-  private:
-    friend class Component;
+template <typename Range>
+concept ComponentRange = RefWrapperRange<Range, Component>;
 
+template <typename Range>
+concept ConstComponentRange = RefWrapperRange<Range, const Component>;
+
+class Game {
   public:
     explicit Game(Window &window, Input &input);
     virtual ~Game();
@@ -29,18 +32,44 @@ class Game {
     [[nodiscard]] const math::Color &ClearColor() const;
     [[nodiscard]] math::Color &ClearColor();
 
+    [[nodiscard]] const CameraManager *CameraManager() const;
+    [[nodiscard]] class CameraManager *CameraManager();
+
+    template <std::derived_from<class CameraManager> T, typename... Args>
+    T &CameraManager(Args &&...args);
+    void RemoveCameraManager();
+
+    [[nodiscard]] const ViewportManager &ViewportManager() const;
+    [[nodiscard]] class ViewportManager &ViewportManager();
+
+    template <std::derived_from<class ViewportManager> T, typename... Args>
+    T &ViewportManager(Args &&...args);
+
+    [[nodiscard]] const Camera *MainCamera() const;
+    [[nodiscard]] Camera *MainCamera();
+
+    [[nodiscard]] std::uint32_t TargetWidth() const;
+    [[nodiscard]] std::uint32_t TargetHeight() const;
+
+    [[nodiscard]] math::Vector3 ScreenToWorld(math::Point screen_point) const;
+    [[nodiscard]] math::Point WorldToScreen(
+        math::Vector3 position, const Viewport *viewport = nullptr) const;
+
+    [[nodiscard]] const Timer &Timer() const;
+
     [[nodiscard]] const Window *Window() const;
     [[nodiscard]] class Window *Window();
 
-    [[nodiscard]] const Timer& Timer() const;
-    [[nodiscard]] class Timer& Timer();
+    [[nodiscard]] const Input *Input() const;
+    [[nodiscard]] class Input *Input();
 
     [[nodiscard]] bool IsRunning() const;
 
     template <std::derived_from<Component> T, typename... Args>
     T &AddComponent(Args &&...args);
 
-    [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
+    [[nodiscard]] ConstComponentRange auto Components() const;
+    [[nodiscard]] ComponentRange auto Components();
 
     void Run();
     void Exit();
@@ -48,31 +77,36 @@ class Game {
   protected:
     virtual void Update(float delta_time);
     virtual void Draw();
+    virtual void Draw(const Camera *camera);
+    virtual void OnTargetResize();
 
   private:
+    friend Component;
+
     void InitializeDevice();
     void InitializeSwapChain(const class Window &window);
     void InitializeRenderTargetView();
 
     void UpdateInternal(float delta_time);
     void DrawInternal();
+    void OnWindowResize(WindowResizeData data);
 
-    [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
+    class Window &window_;
+    class Input &input_;
+    std::unique_ptr<class ViewportManager> viewport_manager_;
+    std::unique_ptr<class CameraManager> camera_manager_;
+
+    std::vector<std::unique_ptr<Component>> components_;
 
     class Timer timer_;
     Timer::Duration time_per_update_;
 
-    Input &input_;
-
-    class Window &window_;
-    UINT target_width_;
-    UINT target_height_;
+    std::uint32_t target_width_;
+    std::uint32_t target_height_;
 
     math::Color clear_color_;
     bool should_exit_;
     bool is_running_;
-
-    std::vector<std::unique_ptr<Component>> components_;
 
     detail::D3DPtr<ID3D11RenderTargetView> render_target_view_;
     detail::D3DPtr<IDXGISwapChain> swap_chain_;

@@ -10,33 +10,51 @@ class SquareComponent final : public computer_graphics::TriangleComponent {
   public:
     explicit SquareComponent(computer_graphics::Game &game);
 
-  private:
-    static std::array<Vertex, 4> vertices;
-    static std::array<Index, 6> indices;
+    void Update(float delta_time) override;
 };
+
+namespace detail {
+
+const std::array vertices{
+    computer_graphics::TriangleComponent::Vertex{
+        computer_graphics::math::Vector3{0.5f, 0.5f, 0.0f},
+        computer_graphics::math::Vector3{0.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::linear::Red,
+        computer_graphics::math::Vector2{1.0f, 0.0f},
+    },
+    computer_graphics::TriangleComponent::Vertex{
+        computer_graphics::math::Vector3{-0.5f, -0.5f, 0.0f},
+        computer_graphics::math::Vector3{0.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::linear::Blue,
+        computer_graphics::math::Vector2{0.0f, 1.0f},
+    },
+    computer_graphics::TriangleComponent::Vertex{
+        computer_graphics::math::Vector3{0.5f, -0.5f, 0.0f},
+        computer_graphics::math::Vector3{0.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::linear::Lime,
+        computer_graphics::math::Vector2{1.0f, 1.0f},
+    },
+    computer_graphics::TriangleComponent::Vertex{
+        computer_graphics::math::Vector3{-0.5f, 0.5f, 0.0f},
+        computer_graphics::math::Vector3{0.0f, 0.0f, 1.0f},
+        computer_graphics::math::colors::linear::White,
+        computer_graphics::math::Vector2{0.0f, 0.0f},
+    },
+};
+
+constexpr std::array<SquareComponent::Index, 6> indices{0, 1, 2, 1, 0, 3};
+
+}  // namespace detail
 
 inline SquareComponent::SquareComponent(computer_graphics::Game &game)
-    : TriangleComponent{game, vertices, indices} {}
+    : TriangleComponent(game, Initializer{.vertices = detail::vertices, .indices = detail::indices}) {}
 
-std::array<SquareComponent::Vertex, 4> SquareComponent::vertices{
-    Vertex{
-        computer_graphics::math::Vector3{0.5f, 0.5f, 0.0f},
-        computer_graphics::math::colors::srgb::Red.v,
-    },
-    Vertex{
-        computer_graphics::math::Vector3{-0.5f, -0.5f, 0.0f},
-        computer_graphics::math::colors::srgb::Blue.v,
-    },
-    Vertex{
-        computer_graphics::math::Vector3{0.5f, -0.5f, 0.0f},
-        computer_graphics::math::colors::srgb::Lime.v,
-    },
-    Vertex{
-        computer_graphics::math::Vector3{-0.5f, 0.5f, 0.0f},
-        computer_graphics::math::colors::srgb::White.v,
-    },
-};
-
-std::array<SquareComponent::Index, 6> SquareComponent::indices{0, 1, 2, 1, 0, 3};
+inline void SquareComponent::Update(const float delta_time) {
+    auto &position = Transform().position;
+    position.x += 0.5f * delta_time;
+    if (position.x > 1.5f) {
+        position.x -= 3.0f;
+    }
+}
 
 #endif  // SQUARE_COMPONENT_HPP_INCLUDED

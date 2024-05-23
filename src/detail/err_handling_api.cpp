@@ -11,9 +11,7 @@ namespace computer_graphics::detail {
 
 std::string LastError() {
     const DWORD last_error = ::GetLastError();
-    if (last_error == 0) {
-        return {};
-    }
+    if (last_error == 0) return {};
 
     LPTSTR buffer = nullptr;
     constexpr DWORD dw_flags =
@@ -21,12 +19,12 @@ std::string LastError() {
     DWORD size = FormatMessage(
         dw_flags, nullptr, last_error,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        (LPTSTR) &buffer, 0, nullptr);
+        reinterpret_cast<LPTSTR>(&buffer), 0, nullptr);
     if (size <= 0) {
         throw std::runtime_error{"Failed to retrieve last error"};
     }
 
-    auto deleter = [](void *ptr) { ::LocalFree(ptr); };
+    auto deleter = [](void *ptr) { LocalFree(ptr); };
     const std::unique_ptr<TCHAR, decltype(deleter)> unique_buffer{buffer, deleter};
 
     return TCharToMultiByte(CP_UTF8, 0, {unique_buffer.get(), size});

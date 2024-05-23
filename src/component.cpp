@@ -1,65 +1,41 @@
 #include "computer_graphics/component.hpp"
 
+#include "computer_graphics/game.hpp"
+
 namespace computer_graphics {
 
-Component::Component(Game &game) : game_{game} {}
+Component::Component(class Game &game, [[maybe_unused]] const Initializer &initializer) : game_{game} {}
 
 Component::~Component() = default;
 
-Input *Component::Input() {
-    return &game_.get().input_;
+void Component::Update(float delta_time) {}
+
+void Component::Draw(const Camera *camera) {}
+
+void Component::OnTargetResize() {}
+
+Game &Component::Game() {
+    return game_;
 }
 
-const Input *Component::Input() const {
-    return &game_.get().input_;
+const Game &Component::Game() const {
+    return game_;
 }
 
-Window *Component::Window() {
-    return &game_.get().window_;
+ID3D11DeviceContext &Component::DeviceContext() {
+    return *Game().device_context_.Get();
 }
 
-const Window *Component::Window() const {
-    return &game_.get().window_;
+const ID3D11DeviceContext &Component::DeviceContext() const {
+    return *Game().device_context_.Get();
 }
 
-ID3D11DeviceContext *Component::DeviceContext() {
-    return game_.get().device_context_.Get();
+ID3D11Device &Component::Device() {
+    return *Game().device_.Get();
 }
 
-const ID3D11DeviceContext *Component::DeviceContext() const {
-    return game_.get().device_context_.Get();
-}
-
-ID3D11Device *Component::Device() {
-    return game_.get().device_.Get();
-}
-
-const ID3D11Device *Component::Device() const {
-    return game_.get().device_.Get();
-}
-
-const math::Color &Component::ClearColor() const {
-    return game_.get().ClearColor();
-}
-
-math::Color &Component::ClearColor() {
-    return game_.get().ClearColor();
-}
-
-const Timer &Component::Timer() const {
-    return game_.get().timer_;
-}
-
-std::span<const std::unique_ptr<Component>> Component::Components() const {
-    return game_.get().Components();
-}
-
-std::span<std::unique_ptr<Component>> Component::Components() {
-    return game_.get().Components();
-}
-
-void Component::Exit() const {
-    game_.get().Exit();
+const ID3D11Device &Component::Device() const {
+    return *Game().device_.Get();
 }
 
 }  // namespace computer_graphics

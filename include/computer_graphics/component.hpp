@@ -3,45 +3,38 @@
 #ifndef COMPONENT_HPP_INCLUDED
 #define COMPONENT_HPP_INCLUDED
 
-#include <functional>
+#include <d3d11.h>
 
-#include "game.hpp"
+#include <functional>
 
 namespace computer_graphics {
 
+class Game;
+class Camera;
+
 class Component {
   public:
-    explicit Component(Game &game);
+    struct Initializer {};
+
+    explicit Component(Game &game, const Initializer &initializer = {});
     virtual ~Component();
 
-    virtual void Update(float delta_time) = 0;
-    virtual void Draw() = 0;
+    virtual void Update(float delta_time);
+    virtual void Draw(const Camera *camera);
+    virtual void OnTargetResize();
 
   protected:
-    [[nodiscard]] Input *Input();
-    [[nodiscard]] const computer_graphics::Input *Input() const;
+    [[nodiscard]] const Game &Game() const;
+    [[nodiscard]] class Game &Game();
 
-    [[nodiscard]] Window *Window();
-    [[nodiscard]] const computer_graphics::Window *Window() const;
+    [[nodiscard]] ID3D11DeviceContext &DeviceContext();
+    [[nodiscard]] const ID3D11DeviceContext &DeviceContext() const;
 
-    [[nodiscard]] ID3D11DeviceContext *DeviceContext();
-    [[nodiscard]] const ID3D11DeviceContext *DeviceContext() const;
-
-    [[nodiscard]] ID3D11Device *Device();
-    [[nodiscard]] const ID3D11Device *Device() const;
-
-    [[nodiscard]] const math::Color &ClearColor() const;
-    [[nodiscard]] math::Color &ClearColor();
-
-    [[nodiscard]] const Timer &Timer() const;
-
-    [[nodiscard]] std::span<const std::unique_ptr<Component>> Components() const;
-    [[nodiscard]] std::span<std::unique_ptr<Component>> Components();
-
-    void Exit() const;
+    [[nodiscard]] ID3D11Device &Device();
+    [[nodiscard]] const ID3D11Device &Device() const;
 
   private:
-    std::reference_wrapper<Game> game_;
+    std::reference_wrapper<class Game> game_;
 };
 
 }  // namespace computer_graphics
