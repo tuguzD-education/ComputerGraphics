@@ -9,8 +9,6 @@
 class SquareComponent final : public computer_graphics::TriangleComponent {
   public:
     explicit SquareComponent(computer_graphics::Game &game);
-
-    void Update(float delta_time) override;
 };
 
 namespace detail {
@@ -48,13 +46,5 @@ constexpr std::array<SquareComponent::Index, 6> indices{0, 1, 2, 1, 0, 3};
 
 inline SquareComponent::SquareComponent(computer_graphics::Game &game)
     : TriangleComponent(game, Initializer{.vertices = detail::vertices, .indices = detail::indices}) {}
-
-inline void SquareComponent::Update(const float delta_time) {
-    auto &position = Transform().position;
-    position.x += 0.5f * delta_time;
-    if (position.x > 1.5f) {
-        position.x -= 3.0f;
-    }
-}
 
 #endif  // SQUARE_COMPONENT_HPP_INCLUDED

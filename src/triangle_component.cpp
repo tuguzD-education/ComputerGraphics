@@ -114,7 +114,7 @@ void TriangleComponent::InitializePixelShader() {
     };
     pixel_byte_code_ =
         detail::ShaderFromFile(
-            "resources/shaders/shader.hlsl", nullptr /*macros*/,
+            "resources/shaders/shader.hlsl", shader_macros.data() /*macros*/,
             D3D_COMPILE_STANDARD_FILE_INCLUDE /*include*/, "PSMain", "ps_5_0",
             D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 

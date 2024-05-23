@@ -17,19 +17,22 @@ class Game final : public computer_graphics::Game {
     void Draw() override;
 
   private:
-    Ball &ball_;
+    void OnKeyDown(computer_graphics::InputKey key);
 
-    Player &red_player_;
+    std::string initial_title_;
     std::size_t red_score_;
-
-    Player &blue_player_;
     std::size_t blue_score_;
+
+    Ball &ball_;
+    Player &red_player_;
+    Player &blue_player_;
 
     Player *won_player = nullptr;
 };
 
 inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
     : computer_graphics::Game(window, input),
+      initial_title_{window.Title()}, red_score_{}, blue_score_{},
       ball_{AddComponent<Ball>()},
       red_player_{AddComponent<Player>(
           computer_graphics::math::colors::srgb::Red.v,
@@ -37,14 +40,14 @@ inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &i
               .up = computer_graphics::InputKey::W,
               .down = computer_graphics::InputKey::S,
           })},
-      red_score_{},
       blue_player_{AddComponent<Player>(
           computer_graphics::math::colors::srgb::Blue.v, Team::Blue,
           Player::ControlKeys{
               .up = computer_graphics::InputKey::Up,
               .down = computer_graphics::InputKey::Down,
-          })},
-      blue_score_{} {}
+          })} {
+    input.OnInputKeyDown().AddRaw(this, &Game::OnKeyDown);
+}
 
 inline void Game::Update(const float delta_time) {
     computer_graphics::Game::Update(delta_time);
@@ -70,10 +73,15 @@ inline void Game::Update(const float delta_time) {
 inline void Game::Draw() {
     computer_graphics::Game::Draw();
 
-    std::string title = "PONG ";
+    std::string title = initial_title_;
     std::format_to(
-        std::back_inserter(title), "[ Red: {} | Blue: {} ]", red_score_, blue_score_);
+        std::back_inserter(title), " [ Red: {} | Blue: {} ]", red_score_, blue_score_);
     Window()->Title(title);
+}
+
+// ReSharper disable once CppParameterMayBeConst
+inline void Game::OnKeyDown(computer_graphics::InputKey key) {
+    if (key == computer_graphics::InputKey::Escape) Exit();
 }
 
 #endif  // PONG_GAME_HPP_INCLUDED
