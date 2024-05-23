@@ -1,5 +1,6 @@
 set(HEADER_LIST
         square_component.hpp
+        square_component_alt.hpp
         game.hpp)
 set(SOURCE_LIST
         main.cpp)

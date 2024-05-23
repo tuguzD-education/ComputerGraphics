@@ -35,7 +35,7 @@ inline Game::~Game() {
 inline void Game::Draw() {
     const float start_time = Timer().StartTime();
     const float red = start_time - std::floor(start_time);
-    ClearColor() = computer_graphics::math::Color{red, 0.1f, 0.1f, 1.0f};
+    ClearColor() = computer_graphics::math::Color{0.5f - red, 0.5f - red, 0.5f - red, 1.0f};
 
     const auto window = Window();
     if (float fps = Timer().FramesPerSecond(); window != nullptr && fps > 0) {

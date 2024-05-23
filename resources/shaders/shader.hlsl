@@ -37,9 +37,5 @@ float4 PSMain(PS_Input input) : SV_Target
 {
 	float4 color = input.color;
 
-#ifdef TEST
-    if (input.position.x > 400) color = TCOLOR;
-#endif
-
 	return color;
 }
