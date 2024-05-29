@@ -5,6 +5,8 @@
 
 #include <VertexTypes.h>
 
+#include <filesystem>
+
 #include "detail/d3d_ptr.hpp"
 #include "scene_component.hpp"
 
@@ -19,44 +21,67 @@ class TriangleComponent : public SceneComponent {
         std::span<const Vertex> vertices;
         std::span<const Index> indices;
 
+        std::filesystem::path texture_path;
+        math::Vector2 tile_count = math::Vector2::One;
+
         Initializer &Vertices(std::span<const Vertex> vertices);
         Initializer &Indices(std::span<const Index> indices);
+        Initializer &TexturePath(const std::filesystem::path &texture_path);
+        Initializer &TileCount(math::Vector2 tile_count);
     };
 
     explicit TriangleComponent(class Game &game, const Initializer &initializer = {});
 
     void Load(std::span<const Vertex> vertices, std::span<const Index> indices);
+    void LoadTexture(const std::filesystem::path &texture_path, math::Vector2 tile_count = math::Vector2::One);
 
     void Draw(const Camera *camera) override;
 
   protected:
-    struct alignas(16) ConstantBuffer {
+    struct alignas(16) VertexShaderConstantBuffer {
         math::Matrix4x4 world;
         math::Matrix4x4 view;
         math::Matrix4x4 projection;
+        math::Vector2 tile_count = math::Vector2::One;
     };
-    virtual void UpdateConstantBuffer(const ConstantBuffer &data);
+
+    struct alignas(16) PixelShaderConstantBuffer {
+        std::uint32_t has_texture = false;
+        math::Vector3 view_position;
+    };
+
+    virtual void UpdateVertexShaderConstantBuffer(const VertexShaderConstantBuffer &data);
+    virtual void UpdatePixelShaderConstantBuffer(const PixelShaderConstantBuffer &data);
 
     detail::D3DPtr<ID3D11Buffer> index_buffer_;
     detail::D3DPtr<ID3D11Buffer> vertex_buffer_;
-    detail::D3DPtr<ID3D11Buffer> constant_buffer_;
+
+    detail::D3DPtr<ID3D11SamplerState> sampler_state_;
+    detail::D3DPtr<ID3D11ShaderResourceView> texture_;
 
     detail::D3DPtr<ID3D11RasterizerState> rasterizer_state_;
     detail::D3DPtr<ID3D11InputLayout> input_layout_;
 
+    detail::D3DPtr<ID3D11Buffer> pixel_shader_constant_buffer_;
     detail::D3DPtr<ID3D11PixelShader> pixel_shader_;
     detail::D3DPtr<ID3DBlob> pixel_byte_code_;
 
+    detail::D3DPtr<ID3D11Buffer> vertex_shader_constant_buffer_;
     detail::D3DPtr<ID3D11VertexShader> vertex_shader_;
     detail::D3DPtr<ID3DBlob> vertex_byte_code_;
 
+    math::Vector2 tile_count_;
+
   private:
     void InitializeVertexShader();
+    void InitializeVertexShaderConstantBuffer();
+
     void InitializePixelShader();
-    void InitializeConstantBuffer();
+    void InitializePixelShaderConstantBuffer();
 
     void InitializeInputLayout();
     void InitializeRasterizerState();
+    void InitializeSamplerState();
 
     void InitializeVertexBuffer(std::span<const Vertex> vertices);
     void InitializeIndexBuffer(std::span<const Index> indices);

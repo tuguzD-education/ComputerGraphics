@@ -40,7 +40,8 @@ set(HEADER_LIST
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/viewport.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/viewport_manager.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/triangle_component.hpp
-        ${PROJECT_SOURCE_DIR}/include/computer_graphics/box_component.hpp)
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/box_component.hpp
+        ../include/computer_graphics/detail/texture.hpp)
 set(SOURCE_LIST
         delegate/delegate.cpp
         delegate/delegate_handle.cpp
@@ -63,7 +64,8 @@ set(SOURCE_LIST
         viewport.cpp
         viewport_manager.cpp
         triangle_component.cpp
-        box_component.cpp)
+        box_component.cpp
+        detail/texture.cpp)
 
 find_package(directxtk CONFIG REQUIRED)
 

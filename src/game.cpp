@@ -151,10 +151,8 @@ void Game::Run() {
             UpdateInternal(delta_time);
             lag -= time_per_update_;
         }
-
         DrawInternal();
     }
-
     is_running_ = false;
     should_exit_ = false;
 }
@@ -231,7 +229,6 @@ void Game::InitializeRenderTargetView() {
     } else {
         throw std::runtime_error{"Failed to find any source to create render target from"};
     }
-
     result = device_->CreateRenderTargetView(resource.Get(), nullptr, &render_target_view_);
     detail::CheckResult(result, "Failed to create render target view");
 }

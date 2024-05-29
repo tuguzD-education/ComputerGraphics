@@ -2,7 +2,8 @@ set(HEADER_LIST
         player.hpp
         ball.hpp
         team.hpp
-        game.hpp)
+        game.hpp
+        field.hpp)
 set(SOURCE_LIST
         main.cpp)
 

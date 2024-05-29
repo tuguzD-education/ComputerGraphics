@@ -7,6 +7,7 @@
 #include <iostream>
 
 #include "ball.hpp"
+#include "field.hpp"
 
 class Game final : public computer_graphics::Game {
   public:
@@ -18,6 +19,8 @@ class Game final : public computer_graphics::Game {
 
   private:
     void OnKeyDown(computer_graphics::InputKey key);
+
+    std::reference_wrapper<Field> field_;
 
     std::string initial_title_;
     std::size_t red_score_;
@@ -32,6 +35,7 @@ class Game final : public computer_graphics::Game {
 
 inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
     : computer_graphics::Game(window, input),
+      field_{AddComponent<Field>()},
       initial_title_{window.Title()},
       red_score_{},
       blue_score_{},
