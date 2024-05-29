@@ -5,12 +5,12 @@
 
 #include <computer_graphics/box_component.hpp>
 
-class Field final : public computer_graphics::BoxComponent {
+class Background final : public computer_graphics::BoxComponent {
   public:
-    explicit Field(computer_graphics::Game& game);
+    explicit Background(computer_graphics::Game& game);
 };
 
-inline Field::Field(computer_graphics::Game &game)
+inline Background::Background(computer_graphics::Game &game)
     : BoxComponent(game, [] {
           Initializer initializer{
               .length = 2.0f,

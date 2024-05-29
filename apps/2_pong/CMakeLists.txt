@@ -3,7 +3,7 @@ set(HEADER_LIST
         ball.hpp
         team.hpp
         game.hpp
-        field.hpp)
+        background.hpp)
 set(SOURCE_LIST
         main.cpp)
 
