@@ -6,6 +6,7 @@
 #include "computer_graphics/camera.hpp"
 #include "computer_graphics/camera_manager.hpp"
 #include "computer_graphics/detail/check_result.hpp"
+#include "computer_graphics/viewport_manager.hpp"
 
 namespace computer_graphics {
 

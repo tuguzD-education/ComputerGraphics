@@ -94,7 +94,8 @@ inline void Game::Draw() {
     computer_graphics::Game::Draw();
 
     std::string title = initial_title_;
-    std::format_to(std::back_inserter(title), " [ Red: {} | Blue: {} ]", red_score_, blue_score_);
+    std::format_to(
+        std::back_inserter(title), " [ Red: {} | Blue: {} ]", red_score_, blue_score_);
     Window()->Title(title);
 }
 

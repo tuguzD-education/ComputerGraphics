@@ -16,7 +16,8 @@ class Viewport : public math::Viewport {
     explicit Viewport(Camera *camera = nullptr) noexcept;
 
     Viewport(float x, float y, float width, float height,
-        float min_depth = 0.0f, float max_depth = 1.0f, Camera *camera = nullptr) noexcept;
+        float min_depth = 0.0f, float max_depth = 1.0f,
+        Camera *camera = nullptr) noexcept;
 
     explicit Viewport(const RECT &rect, Camera *camera = nullptr) noexcept;
 };

@@ -142,7 +142,6 @@ void TriangleComponent::InitializeVertexShaderConstantBuffer() {
         .MiscFlags = 0,
         .StructureByteStride = 0,
     };
-
     const HRESULT result = Device().CreateBuffer(
         &buffer_desc, nullptr, &vertex_shader_constant_buffer_);
     detail::CheckResult(result, "Failed to create constant buffer");
@@ -170,7 +169,8 @@ void TriangleComponent::InitializePixelShaderConstantBuffer() {
         .MiscFlags = 0,
         .StructureByteStride = 0,
     };
-    const HRESULT result = Device().CreateBuffer(&buffer_desc, nullptr, &pixel_shader_constant_buffer_);
+    const HRESULT result = Device().CreateBuffer(
+        &buffer_desc, nullptr, &pixel_shader_constant_buffer_);
     detail::CheckResult(result, "Failed to create pixel shader constant buffer");
 }
 
@@ -235,7 +235,6 @@ void TriangleComponent::InitializeIndexBuffer(std::span<const Index> indices) {
         index_buffer_ = nullptr;
         return;
     }
-
     const D3D11_BUFFER_DESC buffer_desc{
         .ByteWidth = static_cast<std::uint32_t>(indices.size_bytes()),
         .Usage = D3D11_USAGE_DEFAULT,

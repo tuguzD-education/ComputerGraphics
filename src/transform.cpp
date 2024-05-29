@@ -3,8 +3,9 @@
 namespace computer_graphics {
 
 math::Matrix4x4 Transform::ToMatrix() const {
-    return math::Matrix4x4::CreateScale(scale) * math::Matrix4x4::CreateFromQuaternion(rotation) *
-           math::Matrix4x4::CreateTranslation(position);
+    return math::Matrix4x4::CreateScale(scale)
+        * math::Matrix4x4::CreateFromQuaternion(rotation)
+        * math::Matrix4x4::CreateTranslation(position);
 }
 
 void Transform::Concatenate(const Transform& parent, const Transform& child, Transform& result) {

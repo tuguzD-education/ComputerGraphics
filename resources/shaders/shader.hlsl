@@ -36,6 +36,7 @@ VS_Output VSMain(VS_Input input)
 	return output;
 }
 
+Texture2D DiffuseMap : register(t0);
 SamplerState Sampler : register(s0);
 
 cbuffer PSConstantBuffer : register(b0)
@@ -48,7 +49,8 @@ typedef VS_Output PS_Input;
 
 float4 PSMain(PS_Input input) : SV_Target
 {
-	float4 color = input.color;
+    float4 color = has_texture ? DiffuseMap.Sample(Sampler, input.texture_coordinate) : float4(1.0f, 1.0f, 1.0f, 1.0f);
+    color *= input.color;
 
 	return color;
 }

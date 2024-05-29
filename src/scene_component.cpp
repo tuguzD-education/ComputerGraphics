@@ -41,7 +41,6 @@ void SceneComponent::WorldTransform(const class Transform &world_transform) {
         transform_ = world_transform;
         return;
     }
-
     const class Transform inv_world_parent = Transform::Inverse(parent_->WorldTransform());
     transform_ = Transform::Concatenate(inv_world_parent, world_transform);
 }

@@ -13,12 +13,12 @@ class Field final : public computer_graphics::BoxComponent {
 inline Field::Field(computer_graphics::Game &game)
     : BoxComponent(game, [] {
           Initializer initializer{
-              .length = 1.0f,
-              .height = 1.0f,
+              .length = 2.0f,
+              .height = 2.0f,
               .width = 0.0f,
           };
-          initializer.texture_path = "resources/textures/square.jpg";
-          initializer.tile_count = computer_graphics::math::Vector2::One;
+          initializer.texture_path = "resources/textures/labyrinth.jpg";
+          initializer.tile_count = computer_graphics::math::Vector2::One * 6.0f;
           return initializer;
       }()) {}
 

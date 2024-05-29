@@ -47,7 +47,7 @@ std::array<BoxComponent::Vertex, 24> BoxVertices(
             math::Vector3{left, bottom, backward},
             math::Vector3::Backward,
             color,
-            math::Vector2{1.0f, 1.0f},
+            math::Vector2{-1.0f, 1.0f},
         },
         BoxComponent::Vertex{
             math::Vector3{right, bottom, backward},
@@ -65,7 +65,7 @@ std::array<BoxComponent::Vertex, 24> BoxVertices(
             math::Vector3{left, top, backward},
             math::Vector3::Backward,
             color,
-            math::Vector2{1.0f, 0.0f},
+            math::Vector2{-1.0f, 0.0f},
         },
 
         // Top Face
@@ -232,6 +232,7 @@ BoxComponent::BoxComponent(class Game &game, const Initializer &initializer)
     const std::array vertices = detail::BoxVertices(length_, height_, width_, initializer.color);
     const std::array indices = detail::BoxIndices();
     Load(vertices, indices);
+    LoadTexture(initializer.texture_path, initializer.tile_count);
 }
 
 float BoxComponent::Length() const {

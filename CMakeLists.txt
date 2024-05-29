@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.28.1)
 project(itmo_computer_graphics LANGUAGES CXX)
 
 if (MSVC)

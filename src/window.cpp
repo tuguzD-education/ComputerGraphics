@@ -16,21 +16,14 @@ Window::Window(
 
     const std::basic_string<TCHAR> t_name = detail::MultiByteToTChar(CP_UTF8, 0, name);
     const LPCTSTR c_name = t_name.c_str();
-
-    const auto icon = LoadIcon(nullptr, IDI_WINLOGO);
     WNDCLASSEX wc{
         .cbSize = sizeof(decltype(wc)),
         .style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
         .lpfnWndProc = WndProc,
-        .cbClsExtra = 0,
-        .cbWndExtra = 0,
         .hInstance = instance_handle,
-        .hIcon = icon,
         .hCursor = LoadCursor(nullptr, IDC_ARROW),
         .hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)),
-        .lpszMenuName = nullptr,
         .lpszClassName = c_name,
-        .hIconSm = icon,
     };
     RegisterClassEx(&wc);
 
@@ -43,11 +36,12 @@ Window::Window(
     handle_ = CreateWindowEx(
         WS_EX_APPWINDOW, c_name, c_name, WS_OVERLAPPEDWINDOW,
         (GetSystemMetrics(SM_CXSCREEN) - width) / 2, (GetSystemMetrics(SM_CYSCREEN) - height) / 2,
-        rect.right - rect.left, rect.bottom - rect.top, nullptr, nullptr, instance_handle, this);
-
+        rect.right - rect.left, rect.bottom - rect.top,
+        nullptr, nullptr, instance_handle, this);
     ShowWindow(handle_, SW_SHOW);
     SetForegroundWindow(handle_);
     SetFocus(handle_);
+
     ShowCursor(true);
 }
 
@@ -75,7 +69,7 @@ math::Rectangle Window::Dimensions() const {
 
 math::Rectangle Window::ClientDimensions() const {
     RECT rect{};
-    ::GetClientRect(handle_, &rect);
+    GetClientRect(handle_, &rect);
     return math::Rectangle{rect};
 }
 
@@ -136,9 +130,7 @@ void Window::ProcessQueueMessages() {
 
 // ReSharper disable once CppMemberFunctionMayBeConst
 void Window::Destroy() {
-    if (IsDestroyed()) {
-        return;
-    }
+    if (IsDestroyed()) return;
     DestroyWindow(handle_);
 }
 
@@ -152,8 +144,7 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
     } else {
         window = reinterpret_cast<Window *>(GetWindowLongPtr(h_wnd, GWLP_USERDATA));
     }
-    if (!window)
-        return DefWindowProc(h_wnd, u_message, w_param, l_param);
+    if (!window) return DefWindowProc(h_wnd, u_message, w_param, l_param);
 
     switch (u_message) {
         case WM_INPUT: {
@@ -193,7 +184,6 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
                     break;
                 }
             }
-
             raw_input_bytes.clear();
             break;
         }
