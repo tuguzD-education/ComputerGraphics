@@ -5,19 +5,19 @@
 
 #include <computer_graphics/game.hpp>
 
-#include "celestials/deimos.hpp"
-#include "celestials/earth.hpp"
+#include "celestials/earth/earth.hpp"
+#include "celestials/earth/moon.hpp"
 #include "celestials/jupyter.hpp"
-#include "celestials/mars.hpp"
+#include "celestials/mars/deimos.hpp"
+#include "celestials/mars/mars.hpp"
+#include "celestials/mars/phobos.hpp"
 #include "celestials/mercury.hpp"
-#include "celestials/moon.hpp"
 #include "celestials/neptune.hpp"
-#include "celestials/phobos.hpp"
-#include "celestials/saturn.hpp"
-#include "celestials/saturn_ring.hpp"
+#include "celestials/saturn/saturn.hpp"
+#include "celestials/saturn/saturn_ring.hpp"
 #include "celestials/sun.hpp"
-#include "celestials/uranus.hpp"
-#include "celestials/uranus_ring.hpp"
+#include "celestials/uranus/uranus.hpp"
+#include "celestials/uranus/uranus_ring.hpp"
 #include "celestials/venus.hpp"
 
 class Game final : public computer_graphics::Game {

@@ -1,36 +1,36 @@
 set(HEADER_LIST
         game.hpp
-        celestials/deimos.hpp
-        celestials/earth.hpp
+        celestials/mars/deimos.hpp
+        celestials/earth/earth.hpp
         celestials/jupyter.hpp
-        celestials/mars.hpp
+        celestials/mars/mars.hpp
         celestials/mercury.hpp
-        celestials/moon.hpp
+        celestials/earth/moon.hpp
         celestials/neptune.hpp
-        celestials/phobos.hpp
-        celestials/saturn.hpp
+        celestials/mars/phobos.hpp
+        celestials/saturn/saturn.hpp
         celestials/sun.hpp
-        celestials/uranus.hpp
+        celestials/uranus/uranus.hpp
         celestials/venus.hpp
-        celestials/saturn_ring.hpp
-        celestials/uranus_ring.hpp)
+        celestials/saturn/saturn_ring.hpp
+        celestials/uranus/uranus_ring.hpp)
 set(SOURCE_LIST
         main.cpp
         game.cpp
-        celestials/deimos.cpp
-        celestials/earth.cpp
+        celestials/mars/deimos.cpp
+        celestials/earth/earth.cpp
         celestials/jupyter.cpp
-        celestials/mars.cpp
+        celestials/mars/mars.cpp
         celestials/mercury.cpp
-        celestials/moon.cpp
+        celestials/earth/moon.cpp
         celestials/neptune.cpp
-        celestials/phobos.cpp
-        celestials/saturn.cpp
+        celestials/mars/phobos.cpp
+        celestials/saturn/saturn.cpp
         celestials/sun.cpp
-        celestials/uranus.cpp
+        celestials/uranus/uranus.cpp
         celestials/venus.cpp
-        celestials/saturn_ring.cpp
-        celestials/uranus_ring.cpp)
+        celestials/saturn/saturn_ring.cpp
+        celestials/uranus/uranus_ring.cpp)
 
 add_executable(3_solar_system ${SOURCE_LIST} ${HEADER_LIST})
 target_compile_features(3_solar_system PRIVATE cxx_std_20)
