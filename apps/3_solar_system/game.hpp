@@ -14,8 +14,10 @@
 #include "celestials/neptune.hpp"
 #include "celestials/phobos.hpp"
 #include "celestials/saturn.hpp"
+#include "celestials/saturn_ring.hpp"
 #include "celestials/sun.hpp"
 #include "celestials/uranus.hpp"
+#include "celestials/uranus_ring.hpp"
 #include "celestials/venus.hpp"
 
 class Game final : public computer_graphics::Game {
@@ -44,8 +46,13 @@ private:
     Deimos &deimos_;
 
     Jupyter &jupyter_;
+
     Saturn &saturn_;
+    SaturnRing &saturn_ring_;
+
     Uranus &uranus_;
+    UranusRing &uranus_ring_;
+
     Neptune &neptune_;
 };
 

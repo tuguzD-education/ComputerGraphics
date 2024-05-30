@@ -11,7 +11,9 @@ set(HEADER_LIST
         celestials/saturn.hpp
         celestials/sun.hpp
         celestials/uranus.hpp
-        celestials/venus.hpp)
+        celestials/venus.hpp
+        celestials/saturn_ring.hpp
+        celestials/uranus_ring.hpp)
 set(SOURCE_LIST
         main.cpp
         game.cpp
@@ -26,7 +28,9 @@ set(SOURCE_LIST
         celestials/saturn.cpp
         celestials/sun.cpp
         celestials/uranus.cpp
-        celestials/venus.cpp)
+        celestials/venus.cpp
+        celestials/saturn_ring.cpp
+        celestials/uranus_ring.cpp)
 
 add_executable(3_solar_system ${SOURCE_LIST} ${HEADER_LIST})
 target_compile_features(3_solar_system PRIVATE cxx_std_20)

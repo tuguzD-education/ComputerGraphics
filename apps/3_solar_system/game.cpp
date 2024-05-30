@@ -86,11 +86,25 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
               .parent = &sun_,
           }),
       },
+      saturn_ring_{
+          AddComponent<SaturnRing>(Saturn::Initializer{
+              .transform = computer_graphics::Transform{
+                  .position = computer_graphics::math::Vector3::UnitX * 0.0f},
+              .parent = &saturn_,
+          }),
+      },
       uranus_{
           AddComponent<Uranus>(Uranus::Initializer{
               .transform = computer_graphics::Transform{
                   .position = computer_graphics::math::Vector3::UnitX * 12.0f},
               .parent = &sun_,
+          }),
+      },
+      uranus_ring_{
+          AddComponent<UranusRing>(Saturn::Initializer{
+              .transform = computer_graphics::Transform{
+                  .position = computer_graphics::math::Vector3::UnitX * 0.0f},
+              .parent = &uranus_,
           }),
       },
       neptune_{
@@ -163,7 +177,7 @@ void Game::Update(const float delta_time) {
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Up, 0.25f * delta_time);
     mars_.Transform().RotateAround(math::Vector3::Zero, mars_around_sun);
 
-    // Rotate the Deimos around the Mars
+    // Rotate the Phobos around the Mars
     const auto phobos_around_mars =
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Forward, 1.5f * delta_time);
     phobos_.Transform().RotateAround(math::Vector3::Zero, phobos_around_mars);
@@ -195,6 +209,10 @@ void Game::Update(const float delta_time) {
     auto &saturn_mesh_rotation = saturn_.Mesh().Transform().rotation;
     saturn_mesh_rotation = math::Quaternion::Concatenate(saturn_mesh_rotation, saturn_around_self);
 
+    // Rotate the Saturn ring around the Saturn
+    auto &saturn_ring_mesh_rotation = saturn_ring_.Mesh().Transform().rotation;
+    saturn_ring_mesh_rotation = math::Quaternion::Concatenate(saturn_ring_mesh_rotation, saturn_around_self);
+
     // Rotate the Uranus around the Sun
     const auto uranus_around_sun =
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Up, 0.07f * delta_time);
@@ -205,6 +223,10 @@ void Game::Update(const float delta_time) {
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Forward, 0.5f * delta_time);
     auto &uranus_mesh_rotation = uranus_.Mesh().Transform().rotation;
     uranus_mesh_rotation = math::Quaternion::Concatenate(uranus_mesh_rotation, uranus_around_self);
+
+    // Rotate the Uranus ring around the Uranus
+    auto &uranus_ring_mesh_rotation = uranus_ring_.Mesh().Transform().rotation;
+    uranus_ring_mesh_rotation = math::Quaternion::Concatenate(uranus_ring_mesh_rotation, uranus_around_self);
 
     // Rotate the Neptune around the Sun
     const auto neptune_around_sun =
