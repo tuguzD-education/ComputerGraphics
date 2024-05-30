@@ -3,7 +3,12 @@
 #ifndef FIELD_HPP_INCLUDED
 #define FIELD_HPP_INCLUDED
 
+#include <d3dcompiler.h>
+
 #include <computer_graphics/box_component.hpp>
+
+#include "computer_graphics/detail/check_result.hpp"
+#include "computer_graphics/detail/shader.hpp"
 
 class Background final : public computer_graphics::BoxComponent {
   public:
@@ -11,15 +16,28 @@ class Background final : public computer_graphics::BoxComponent {
 };
 
 inline Background::Background(computer_graphics::Game &game)
-    : BoxComponent(game, [] {
-          Initializer initializer{
-              .length = 2.0f,
-              .height = 2.0f,
-              .width = 0.0f,
-          };
-          initializer.texture_path = "resources/textures/labyrinth.jpg";
-          initializer.tile_count = computer_graphics::math::Vector2::One * 6.0f;
-          return initializer;
-      }()) {}
+    : BoxComponent(game, Initializer{}) {
+    vertex_byte_code_ = computer_graphics::detail::ShaderFromFile(
+       "resources/shaders/chess.hlsl", nullptr /*macros*/,
+       D3D_COMPILE_STANDARD_FILE_INCLUDE /*include*/, "VSMain", "vs_5_0",
+       D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
+
+    HRESULT result = Device().CreateVertexShader(
+        vertex_byte_code_->GetBufferPointer(),
+        vertex_byte_code_->GetBufferSize(),
+        nullptr, &vertex_shader_);
+    computer_graphics::detail::CheckResult(result, "Failed to create vertex shader from byte code");
+
+    pixel_byte_code_ = computer_graphics::detail::ShaderFromFile(
+        "resources/shaders/chess.hlsl", nullptr /*macros*/,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE /*include*/, "PSMain", "ps_5_0",
+        D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
+
+    result = Device().CreatePixelShader(
+        pixel_byte_code_->GetBufferPointer(),
+        pixel_byte_code_->GetBufferSize(),
+        nullptr, &pixel_shader_);
+    computer_graphics::detail::CheckResult(result, "Failed to create index shader from byte code");
+}
 
 #endif //FIELD_HPP_INCLUDED
