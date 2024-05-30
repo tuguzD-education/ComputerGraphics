@@ -41,6 +41,9 @@ class Window {
     [[nodiscard]] std::int32_t MinHeight() const;
     [[nodiscard]] std::int32_t &MinHeight();
 
+    [[nodiscard]] math::Point CursorPosition() const;
+    bool CursorPosition(math::Point cursor_position);
+
     [[nodiscard]] bool IsDestroyed() const;
     [[nodiscard]] bool IsFocused() const;
 
@@ -56,7 +59,8 @@ class Window {
   private:
     friend class Input;
 
-    static LRESULT CALLBACK WndProc(HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param);
+    static LRESULT CALLBACK WndProc(
+        HWND h_wnd, UINT u_message, WPARAM w_param, LPARAM l_param);
 
     HWND handle_;
     bool is_destroyed_;

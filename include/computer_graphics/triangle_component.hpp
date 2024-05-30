@@ -8,6 +8,8 @@
 #include <filesystem>
 
 #include "detail/d3d_ptr.hpp"
+#include "light.hpp"
+#include "material.hpp"
 #include "scene_component.hpp"
 
 namespace computer_graphics {
@@ -20,20 +22,30 @@ class TriangleComponent : public SceneComponent {
     struct Initializer : SceneComponent::Initializer {
         std::span<const Vertex> vertices;
         std::span<const Index> indices;
+        bool wireframe = false;
 
         std::filesystem::path texture_path;
         math::Vector2 tile_count = math::Vector2::One;
+        Material material;
 
         Initializer &Vertices(std::span<const Vertex> vertices);
         Initializer &Indices(std::span<const Index> indices);
+        Initializer &Wireframe(bool wireframe);
         Initializer &TexturePath(const std::filesystem::path &texture_path);
         Initializer &TileCount(math::Vector2 tile_count);
+        Initializer &Material(const Material &material);
     };
 
     explicit TriangleComponent(class Game &game, const Initializer &initializer = {});
 
     void Load(std::span<const Vertex> vertices, std::span<const Index> indices);
     void LoadTexture(const std::filesystem::path &texture_path, math::Vector2 tile_count = math::Vector2::One);
+
+    [[nodiscard]] bool Wireframe() const;
+    [[nodiscard]] bool &Wireframe();
+
+    [[nodiscard]] const Material &Material() const;
+    [[nodiscard]] class Material &Material();
 
     void Draw(const Camera *camera) override;
 
@@ -48,6 +60,11 @@ class TriangleComponent : public SceneComponent {
     struct alignas(16) PixelShaderConstantBuffer {
         std::uint32_t has_texture = false;
         math::Vector3 view_position;
+        class Material material;
+
+        AmbientLight ambient_light;
+        DirectionalLight directional_light;
+        PointLight point_light;
     };
 
     virtual void UpdateVertexShaderConstantBuffer(const VertexShaderConstantBuffer &data);
@@ -70,7 +87,11 @@ class TriangleComponent : public SceneComponent {
     detail::D3DPtr<ID3D11VertexShader> vertex_shader_;
     detail::D3DPtr<ID3DBlob> vertex_byte_code_;
 
+    bool wireframe_;
+    bool prev_wireframe_;
+
     math::Vector2 tile_count_;
+    class Material material_;
 
   private:
     void InitializeVertexShader();

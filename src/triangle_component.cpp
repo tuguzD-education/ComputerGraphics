@@ -22,6 +22,11 @@ auto TriangleComponent::Initializer::Indices(const std::span<const Index> indice
     return *this;
 }
 
+auto TriangleComponent::Initializer::Wireframe(const bool wireframe) -> Initializer & {
+    this->wireframe = wireframe;
+    return *this;
+}
+
 auto TriangleComponent::Initializer::TexturePath(const std::filesystem::path &texture_path) -> Initializer & {
     this->texture_path = texture_path;
     return *this;
@@ -32,8 +37,15 @@ auto TriangleComponent::Initializer::TileCount(const math::Vector2 tile_count) -
     return *this;
 }
 
+auto TriangleComponent::Initializer::Material(const computer_graphics::Material &material) -> Initializer & {
+    this->material = material;
+    return *this;
+}
+
 TriangleComponent::TriangleComponent(class Game &game, const Initializer &initializer)
-    : SceneComponent(game, initializer), tile_count_{math::Vector2::One} {
+    : SceneComponent(game, initializer),
+      wireframe_{initializer.wireframe}, prev_wireframe_{initializer.wireframe},
+      tile_count_{math::Vector2::One} {
     InitializeVertexShader();
     InitializeVertexShaderConstantBuffer();
 
@@ -46,6 +58,7 @@ TriangleComponent::TriangleComponent(class Game &game, const Initializer &initia
 
     Load(initializer.vertices, initializer.indices);
     LoadTexture(initializer.texture_path, initializer.tile_count);
+    material_ = initializer.material;
 
     if (initializer.name == "component") {
         Name() = "triangle_component";
@@ -64,9 +77,29 @@ void TriangleComponent::LoadTexture(const std::filesystem::path &texture_path, c
     tile_count_ = tile_count;
 }
 
+bool TriangleComponent::Wireframe() const {
+    return wireframe_;
+}
+
+bool &TriangleComponent::Wireframe() {
+    return wireframe_;
+}
+
+const Material &TriangleComponent::Material() const {
+    return material_;
+}
+
+Material &TriangleComponent::Material() {
+    return material_;
+}
+
 void TriangleComponent::Draw(const Camera *camera) {
     if (vertex_buffer_ == nullptr || index_buffer_ == nullptr) {
         return;
+    }
+    if (wireframe_ != prev_wireframe_) {
+        InitializeRasterizerState();
+        prev_wireframe_ = wireframe_;
     }
     ID3D11DeviceContext &device_context = DeviceContext();
 
@@ -101,6 +134,10 @@ void TriangleComponent::Draw(const Camera *camera) {
     const PixelShaderConstantBuffer ps_constant_buffer{
         .has_texture = texture_ != nullptr,
         .view_position = (camera != nullptr) ? camera->WorldTransform().position : math::Vector3::Backward,
+        .material = material_,
+        .ambient_light = Game().AmbientLight().Primitive(),
+        .directional_light = Game().DirectionalLight().Primitive(),
+        .point_light = Game().PointLight().Primitive(),
     };
     UpdatePixelShaderConstantBuffer(ps_constant_buffer);
 
@@ -109,7 +146,8 @@ void TriangleComponent::Draw(const Camera *camera) {
         0, ps_constant_buffers.size(), ps_constant_buffers.data());
 
     const std::array shader_resources{texture_.Get()};
-    device_context.PSSetShaderResources(0, shader_resources.size(), shader_resources.data());
+    device_context.PSSetShaderResources(
+        0, shader_resources.size(), shader_resources.data());
 
     const std::array sampler_states{sampler_state_.Get()};
     device_context.PSSetSamplers(0, sampler_states.size(), sampler_states.data());
@@ -186,8 +224,8 @@ void TriangleComponent::InitializeInputLayout() {
 }
 
 void TriangleComponent::InitializeRasterizerState() {
-    constexpr D3D11_RASTERIZER_DESC rasterizer_desc{
-        .FillMode = D3D11_FILL_SOLID,
+    const D3D11_RASTERIZER_DESC rasterizer_desc{
+        .FillMode = wireframe_ ? D3D11_FILL_WIREFRAME : D3D11_FILL_SOLID,
         .CullMode = D3D11_CULL_FRONT,
     };
     const HRESULT result = Device().CreateRasterizerState(&rasterizer_desc, &rasterizer_state_);
@@ -248,7 +286,6 @@ void TriangleComponent::InitializeIndexBuffer(std::span<const Index> indices) {
         .SysMemPitch = 0,
         .SysMemSlicePitch = 0,
     };
-
     const HRESULT result = Device().CreateBuffer(&buffer_desc, &initial_data, &index_buffer_);
     detail::CheckResult(result, "Failed to create index buffer");
 }

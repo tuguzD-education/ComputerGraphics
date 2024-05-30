@@ -2,6 +2,8 @@
   "name": "computer-graphics",
   "version": "0.0.1",
   "dependencies": [
-    "directxtk"
+    "directxtk",
+    "range-v3",
+    "assimp"
   ]
 }

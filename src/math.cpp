@@ -23,4 +23,91 @@ Vector3 RotateAround(const Vector3 &position, const Vector3 &rotation_point, con
     return result;
 }
 
+bool Intersects(const Plane lhs, const Plane rhs) {
+    DirectX::XMVECTOR line_point_1_xm, line_point_2_xm;
+    XMPlaneIntersectPlane(
+        &line_point_1_xm, &line_point_2_xm, lhs, rhs);
+
+    const Vector3 line_point_1{line_point_1_xm}, line_point_2{line_point_2_xm};
+    auto all_nan = [](const Vector3 &vector) {
+        auto &[x, y, z] = vector;
+        return std::isnan(x) && std::isnan(y) && std::isnan(z);
+    };
+    const bool parallel = all_nan(line_point_1) && all_nan(line_point_2);
+    return !parallel;
+}
+
+Vector3 Triangle::Tangent() const {
+    return Normalize(point1 - point0);
+}
+
+Vector3 Triangle::Normal() const {
+    const Vector3 cross = (point1 - point0).Cross(point2 - point1);
+    return Normalize(cross);
+}
+
+Vector3 Triangle::Binormal() const {
+    const Vector3 tangent = Tangent();
+    const Vector3 normal = Normal();
+    return tangent.Cross(normal);
+}
+
+Plane Triangle::Plane() const {
+    return math::Plane{point0, point1, point2};
+}
+
+bool Triangle::Intersects(const AxisAlignedBox &axis_aligned_box) const {
+    return axis_aligned_box.Intersects(point0, point1, point2);
+}
+
+bool Triangle::Intersects(const Box &box) const {
+    return box.Intersects(point0, point1, point2);
+}
+
+bool Triangle::Intersects(const Sphere sphere) const {
+    return sphere.Intersects(point0, point1, point2);
+}
+
+bool Triangle::Intersects(const Frustum &frustum) const {
+    return frustum.Intersects(point0, point1, point2);
+}
+
+bool Triangle::Intersects(const Ray &ray, float &dist) const {
+    return ray.Intersects(point0, point1, point2, dist);
+}
+
+bool Triangle::Intersects(const Triangle &other) const {
+    return DirectX::TriangleTests::Intersects(
+        point0, point1, point2,
+        other.point0, other.point1, other.point2);
+}
+
+PlaneIntersectionType Triangle::Intersects(const math::Plane plane) const {
+    return DirectX::TriangleTests::Intersects(point0, point1, point2, plane);
+}
+
+ContainmentType Triangle::ContainedBy(const AxisAlignedBox &axis_aligned_box) const {
+    return axis_aligned_box.Contains(point0, point1, point2);
+}
+
+ContainmentType Triangle::ContainedBy(const Box &box) const {
+    return box.Contains(point0, point1, point2);
+}
+
+ContainmentType Triangle::ContainedBy(const Sphere sphere) const {
+    return sphere.Contains(point0, point1, point2);
+}
+
+ContainmentType Triangle::ContainedBy(const Frustum &frustum) const {
+    return frustum.Contains(point0, point1, point2);
+}
+
+ContainmentType Triangle::ContainedBy(
+    const math::Plane plane0, const math::Plane plane1, const math::Plane plane2,
+    const math::Plane plane3, const math::Plane plane4, const math::Plane plane5) const {
+    return DirectX::TriangleTests::ContainedBy(
+        point0, point1, point2,
+        plane0, plane1, plane2, plane3, plane4, plane5);
+}
+
 }  // namespace computer_graphics::math

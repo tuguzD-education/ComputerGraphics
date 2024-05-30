@@ -89,6 +89,32 @@ std::int32_t &Window::MinHeight() {
     return min_height_;
 }
 
+math::Point Window::CursorPosition() const {
+    POINT point;
+    if (!GetCursorPos(&point) || !ScreenToClient(handle_, &point)) {
+        return math::Point{
+            .x = -1,
+            .y = -1,
+        };
+    }
+    return math::Point{
+        .x = static_cast<std::int32_t>(point.x),
+        .y = static_cast<std::int32_t>(point.y),
+    };
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+bool Window::CursorPosition(const math::Point cursor_position) {
+    POINT point{
+        .x = cursor_position.x,
+        .y = cursor_position.y,
+    };
+    if (!ClientToScreen(handle_, &point)) {
+        return false;
+    }
+    return SetCursorPos(point.x, point.y);
+}
+
 bool Window::IsDestroyed() const {
     return is_destroyed_;
 }
@@ -166,7 +192,8 @@ LRESULT CALLBACK Window::WndProc(HWND h_wnd, const UINT u_message, const WPARAM 
             result = GetRawInputData(
                 h_raw_input, RID_INPUT, raw_input_bytes.data(), &size, sizeof(RAWINPUTHEADER));
             if (result != size) {
-                throw std::runtime_error{"Failed to obtain raw input: GetRawInputData does not return correct size"};
+                throw std::runtime_error{
+                    "Failed to obtain raw input: GetRawInputData does not return correct size"};
             }
 
             // ReSharper disable once CppTooWideScopeInitStatement

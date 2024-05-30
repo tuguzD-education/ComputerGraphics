@@ -8,12 +8,17 @@
 
 #include "camera_manager.hpp"
 #include "concepts.hpp"
+#include "debug_draw.hpp"
 #include "detail/d3d_ptr.hpp"
 #include "input.hpp"
 #include "timer.hpp"
 #include "viewport_manager.hpp"
 
 namespace computer_graphics {
+
+class AmbientLightComponent;
+class DirectionalLightComponent;
+class PointLightComponent;
 
 template <typename Range>
 concept ComponentRange = RefWrapperRange<Range, Component>;
@@ -45,11 +50,29 @@ class Game {
     template <std::derived_from<class ViewportManager> T, typename... Args>
     T &ViewportManager(Args &&...args);
 
+    [[nodiscard]] const DebugDraw &DebugDraw() const;
+    [[nodiscard]] class DebugDraw &DebugDraw();
+
+    template <std::derived_from<class DebugDraw> T, typename... Args>
+    T &DebugDraw(Args &&...args);
+
+    [[nodiscard]] const AmbientLightComponent &AmbientLight() const;
+    [[nodiscard]] AmbientLightComponent &AmbientLight();
+
+    [[nodiscard]] const DirectionalLightComponent &DirectionalLight() const;
+    [[nodiscard]] DirectionalLightComponent &DirectionalLight();
+
+    [[nodiscard]] const PointLightComponent &PointLight() const;
+    [[nodiscard]] PointLightComponent &PointLight();
+
     [[nodiscard]] const Camera *MainCamera() const;
     [[nodiscard]] Camera *MainCamera();
 
     [[nodiscard]] std::uint32_t TargetWidth() const;
     [[nodiscard]] std::uint32_t TargetHeight() const;
+
+    [[nodiscard]] math::Vector3 ScreenToWorld(math::Point screen_point) const;
+    [[nodiscard]] math::Point WorldToScreen(math::Vector3 position, const Viewport *viewport = nullptr) const;
 
     [[nodiscard]] const Timer &Timer() const;
 
@@ -84,6 +107,7 @@ class Game {
     void InitializeDevice();
     void InitializeSwapChain(const class Window &window);
     void InitializeRenderTargetView();
+    void InitializeDepthStencilView();
 
     void UpdateInternal(float delta_time);
     void DrawInternal();
@@ -93,6 +117,11 @@ class Game {
     class Input &input_;
     std::unique_ptr<class ViewportManager> viewport_manager_;
     std::unique_ptr<class CameraManager> camera_manager_;
+    std::unique_ptr<class DebugDraw> debug_draw_;
+
+    std::unique_ptr<AmbientLightComponent> ambient_light_;
+    std::unique_ptr<DirectionalLightComponent> directional_light_;
+    std::unique_ptr<PointLightComponent> point_light_;
 
     std::vector<std::unique_ptr<Component>> components_;
 
@@ -105,6 +134,10 @@ class Game {
     math::Color clear_color_;
     bool should_exit_;
     bool is_running_;
+
+    detail::D3DPtr<ID3D11DepthStencilView> depth_stencil_view_;
+    detail::D3DPtr<ID3D11DepthStencilState> depth_stencil_state_;
+    detail::D3DPtr<ID3D11Texture2D> depth_buffer_;
 
     detail::D3DPtr<ID3D11RenderTargetView> render_target_view_;
     detail::D3DPtr<IDXGISwapChain> swap_chain_;
