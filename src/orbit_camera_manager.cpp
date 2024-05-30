@@ -5,7 +5,7 @@
 
 namespace computer_graphics {
 
-constexpr float OrbitCameraManager::min_distance = 1e-4f;
+constexpr float OrbitCameraManager::min_distance = 1.5f;
 
 auto OrbitCameraManager::Initializer::Target(const SceneComponent& target) -> Initializer& {
     this->target = target;

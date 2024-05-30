@@ -13,8 +13,6 @@ class Earth final : public computer_graphics::SceneComponent, public computer_gr
     [[nodiscard]] const computer_graphics::BoxComponent &Mesh() const;
     [[nodiscard]] computer_graphics::BoxComponent &Mesh();
 
-    void Draw(const computer_graphics::Camera *camera) override;
-
     [[nodiscard]] bool Intersects(const Collision &other) const override;
     [[nodiscard]] bool Intersects(const computer_graphics::math::Ray &ray, float &dist) const override;
 

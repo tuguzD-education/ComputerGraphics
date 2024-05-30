@@ -33,9 +33,9 @@ class SpectatorCameraManager : public CameraManager {
     struct Initializer : CameraManager::Initializer {
         Camera* camera = nullptr;
         MovementInput movement_input;
-        float speed = 1.0f;
+        float speed = 10.0f;
         float sensitivity = 1.0f;
-        float zoom_speed = 1.0f;
+        float zoom_speed = 10.0f;
 
         Initializer& Camera(Camera* camera);
         Initializer& MovementInput(MovementInput movement_input);

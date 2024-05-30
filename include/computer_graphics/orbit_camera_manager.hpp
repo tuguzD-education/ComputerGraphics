@@ -10,7 +10,7 @@
 namespace computer_graphics {
 
 class OrbitCameraManager : public CameraManager {
-public:
+  public:
     static const float min_distance;
 
     struct Initializer : CameraManager::Initializer {
@@ -18,7 +18,7 @@ public:
         Camera *camera = nullptr;
         float distance = min_distance;
         float sensitivity = 1.0f;
-        float zoom_speed = 1.0f;
+        float zoom_speed = 50.0f;
 
         Initializer &Target(const SceneComponent &target);
         Initializer &Camera(Camera *camera);
@@ -44,7 +44,7 @@ public:
 
     void Update(float delta_time) override;
 
-private:
+  private:
     void OnMouseMove(const MouseMoveData &data);
 
     std::reference_wrapper<Camera> camera_;
@@ -60,4 +60,4 @@ private:
 
 }  // namespace computer_graphics
 
-#endif //ORBIT_CAMERA_MANAGER_HPP_INCLUDED
+#endif  // ORBIT_CAMERA_MANAGER_HPP_INCLUDED

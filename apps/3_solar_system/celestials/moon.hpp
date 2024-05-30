@@ -13,8 +13,6 @@ class Moon final : public computer_graphics::SceneComponent, public computer_gra
     [[nodiscard]] const computer_graphics::GeometricPrimitiveComponent &Mesh() const;
     [[nodiscard]] computer_graphics::GeometricPrimitiveComponent &Mesh();
 
-    void Draw(const computer_graphics::Camera *camera) override;
-
     [[nodiscard]] bool Intersects(const Collision &other) const override;
     [[nodiscard]] bool Intersects(const computer_graphics::math::Ray &ray, float &dist) const override;
 

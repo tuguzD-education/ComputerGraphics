@@ -30,14 +30,6 @@ computer_graphics::GeometricPrimitiveComponent& Phobos::Mesh() {
     return mesh_;
 }
 
-void Phobos::Draw(const computer_graphics::Camera* camera) {
-    SceneComponent::Draw(camera);
-
-    const auto collision_primitive = CollisionPrimitive();
-    const auto& sphere = collision_primitive.Primitive();
-    Game().DebugDraw().DrawSphere(sphere);
-}
-
 bool Phobos::Intersects(const computer_graphics::Collision& other) const {
     return CollisionPrimitive().Intersects(other);
 }

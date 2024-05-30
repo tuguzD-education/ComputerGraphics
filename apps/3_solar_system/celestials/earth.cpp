@@ -29,14 +29,6 @@ computer_graphics::BoxComponent& Earth::Mesh() {
     return mesh_;
 }
 
-void Earth::Draw(const computer_graphics::Camera* camera) {
-    SceneComponent::Draw(camera);
-
-    const auto collision_primitive = CollisionPrimitive();
-    const auto& box = collision_primitive.Primitive();
-    Game().DebugDraw().DrawBox(box);
-}
-
 bool Earth::Intersects(const computer_graphics::Collision& other) const {
     return CollisionPrimitive().Intersects(other);
 }
