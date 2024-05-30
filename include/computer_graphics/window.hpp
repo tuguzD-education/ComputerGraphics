@@ -44,6 +44,8 @@ class Window {
     [[nodiscard]] math::Point CursorPosition() const;
     bool CursorPosition(math::Point cursor_position);
 
+    [[nodiscard]] bool IsCursorInWindow() const;
+
     [[nodiscard]] bool IsDestroyed() const;
     [[nodiscard]] bool IsFocused() const;
 

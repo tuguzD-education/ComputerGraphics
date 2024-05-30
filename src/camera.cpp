@@ -11,57 +11,45 @@ struct overloaded : Ts... {
 
 }  // namespace detail
 
-auto Camera::Initializer::ProjectionType(const CameraProjectionType projection_type) -> Initializer& {
-    this->projection_type = projection_type;
-    return *this;
-}
+Camera::Camera(class Game& game)
+    : SceneComponent(game),
+      width_{0.0f},
+      height_{0.0f},
+      near_plane_{0.1f},
+      far_plane_{100.0f},
+      projection_{std::make_unique<OrthographicProjection>()} {}
 
-auto Camera::Initializer::Width(const float width) -> Initializer& {
-    if (width >= 0.0f) {
-        this->width = width;
-    }
-    return *this;
-}
-
-auto Camera::Initializer::Height(const float height) -> Initializer& {
-    if (height >= 0.0f) {
-        this->height = height;
-    }
-    return *this;
-}
-
-auto Camera::Initializer::NearPlane(const float near_plane) -> Initializer& {
-    if (near_plane > 0.0f && near_plane != this->far_plane) {
-        this->near_plane = near_plane;
-    }
-    return *this;
-}
-
-auto Camera::Initializer::FarPlane(const float far_plane) -> Initializer& {
-    if (far_plane > 0.0f && this->near_plane != far_plane) {
-        this->far_plane = far_plane;
-    }
-    return *this;
-}
-
-Camera::Camera(class Game& game, const Initializer& initializer)
+Camera::Camera(class Game& game, Initializer&& initializer)
     : SceneComponent(game, initializer),
       width_{initializer.width},
       height_{initializer.height},
       near_plane_{initializer.near_plane},
       far_plane_{initializer.far_plane},
-      projection_type_{initializer.projection_type} {
-    if (initializer.name == "scene_component") {
-        Name() = "camera";
+      projection_{std::move(initializer.projection)} {
+    if (projection_ != nullptr) {
+        return;
     }
+    projection_ = std::make_unique<OrthographicProjection>();
 }
 
-const CameraProjectionType& Camera::ProjectionType() const {
-    return projection_type_;
+const Projection& Camera::Projection() const {
+    return *projection_;
 }
 
-CameraProjectionType& Camera::ProjectionType() {
-    return projection_type_;
+Projection& Camera::Projection() {
+    return *projection_;
+}
+
+void Camera::Projection(UniqueProjection&& projection) {
+    projection_ = std::move(projection);
+}
+
+math::Matrix4x4 Camera::ViewMatrix() const {
+    return WorldTransform().ViewMatrix();
+}
+
+math::Matrix4x4 Camera::ProjectionMatrix() const {
+    return projection_->ToMatrix(width_, height_, near_plane_, far_plane_);
 }
 
 float Camera::Width() const {
@@ -121,39 +109,8 @@ float Camera::InverseAspectRatio() const {
     return aspect_ratio != 0.0f ? 1.0f / aspect_ratio : 0.0f;
 }
 
-math::Matrix4x4 Camera::View() const {
-    const class Transform world_transform = WorldTransform();
-    const math::Vector3 eye = world_transform.position;
-    const math::Vector3 target = world_transform.position + world_transform.Forward();
-    const math::Vector3 up = world_transform.Up();
-
-    return math::Matrix4x4::CreateLookAt(eye, target, up);
-}
-
-math::Matrix4x4 Camera::Projection() const {
-    auto perspective = [this](const PerspectiveCameraProjectionType& projection_type) {
-        const float fov = projection_type.horizontal_fov;
-        return math::Matrix4x4::CreatePerspectiveFieldOfView(
-            fov, AspectRatio(), near_plane_, far_plane_);
-    };
-    auto orthographic = [this](const OrthographicCameraProjectionType& projection_type) {
-        const float units = projection_type.orthographic_units;
-        return math::Matrix4x4::CreateOrthographic(
-            units, units * InverseAspectRatio(), near_plane_, far_plane_);
-    };
-    return std::visit(detail::overloaded{perspective, orthographic}, projection_type_);
-}
-
 math::Frustum Camera::Frustum() const {
-    const auto [origin, orientation, scale] = WorldTransform();
-    const float right_slope = width_ / 2.0f;
-    const float left_slope = -width_ / 2.0f;
-    const float top_slope = height_ / 2.0f;
-    const float bottom_slope = -height_ / 2.0f;
-    return math::Frustum{
-        origin, orientation, right_slope, left_slope,
-        top_slope, bottom_slope, near_plane_, far_plane_,
-    };
+    return projection_->ToFrustum(WorldTransform(), width_, height_, near_plane_, far_plane_);
 }
 
 }  // namespace computer_graphics

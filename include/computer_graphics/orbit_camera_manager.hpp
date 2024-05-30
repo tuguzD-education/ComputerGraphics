@@ -16,19 +16,17 @@ class OrbitCameraManager : public CameraManager {
     struct Initializer : CameraManager::Initializer {
         std::reference_wrapper<const SceneComponent> target;
         Camera *camera = nullptr;
+        InputKey enable_look_input_key = InputKey::MiddleButton;
         float distance = min_distance;
         float sensitivity = 1.0f;
         float zoom_speed = 50.0f;
-
-        Initializer &Target(const SceneComponent &target);
-        Initializer &Camera(Camera *camera);
-        Initializer &Distance(float distance);
-        Initializer &Sensitivity(float sensitivity);
-        Initializer &ZoomSpeed(float zoom_speed);
     };
 
     explicit OrbitCameraManager(class Game &game, const Initializer &initializer);
     ~OrbitCameraManager() override;
+
+    [[nodiscard]] InputKey EnableLookInputKey() const;
+    [[nodiscard]] InputKey &EnableLookInputKey();
 
     [[nodiscard]] float Distance() const;
     bool Distance(float distance);
@@ -50,6 +48,7 @@ class OrbitCameraManager : public CameraManager {
     std::reference_wrapper<Camera> camera_;
     std::reference_wrapper<const SceneComponent> target_;
 
+    InputKey enable_look_input_key_;
     float distance_;
     float sensitivity_;
     float zoom_speed_;

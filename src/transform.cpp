@@ -8,6 +8,14 @@ math::Matrix4x4 Transform::ToMatrix() const {
         * math::Matrix4x4::CreateTranslation(position);
 }
 
+math::Matrix4x4 Transform::ViewMatrix() const {
+    const math::Vector3 eye = position;
+    const math::Vector3 target = position + Forward();
+    const math::Vector3 up = Up();
+
+    return math::Matrix4x4::CreateLookAt(eye, target, up);
+}
+
 void Transform::Concatenate(const Transform& parent, const Transform& child, Transform& result) {
     result = Transform{
         .position = math::Vector3::Transform(parent.scale * child.position, parent.rotation) + parent.position,
@@ -32,7 +40,6 @@ void Transform::Inverse(const Transform& transform, Transform& result) {
         invert_scale_axis(transform.scale.y),
         invert_scale_axis(transform.scale.z),
     };
-
     const math::Vector3 inv_position =
         math::Vector3::Transform(inv_scale * (transform.position * -1), inv_rotation);
 

@@ -10,7 +10,7 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
       camera_{
           AddComponent<computer_graphics::Camera>([] {
               computer_graphics::Camera::Initializer initializer{
-                  .projection_type = computer_graphics::PerspectiveCameraProjectionType{},
+                  .projection = std::make_unique<computer_graphics::PerspectiveProjection>(),
               };
               initializer.Transform({
                   .position = computer_graphics::math::Vector3{0.0f, 6.0f, 6.0f},
@@ -305,6 +305,79 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     .camera = &camera_,
                 });
             }
+            break;
+        }
+        // TODO: "Fit to view" feature from UE5 (fully fit camera frustrum onto each celestial body)
+        case computer_graphics::InputKey::D1: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = sun_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D2: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = mercury_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D3: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = venus_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D4: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = earth_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D5: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = mars_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D6: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = jupyter_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D7: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = saturn_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D8: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = uranus_,
+                    .camera = &camera_,
+                });
+            break;
+        }
+        case computer_graphics::InputKey::D9: {
+            CameraManager<computer_graphics::OrbitCameraManager>(
+                    computer_graphics::OrbitCameraManager::Initializer{
+                    .target = neptune_,
+                    .camera = &camera_,
+                });
             break;
         }
         default: {

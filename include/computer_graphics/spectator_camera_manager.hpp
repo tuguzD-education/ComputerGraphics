@@ -33,15 +33,10 @@ class SpectatorCameraManager : public CameraManager {
     struct Initializer : CameraManager::Initializer {
         Camera* camera = nullptr;
         MovementInput movement_input;
+        InputKey enable_look_input_key = InputKey::MiddleButton;
         float speed = 10.0f;
         float sensitivity = 1.0f;
         float zoom_speed = 10.0f;
-
-        Initializer& Camera(Camera* camera);
-        Initializer& MovementInput(MovementInput movement_input);
-        Initializer& Speed(float speed);
-        Initializer& Sensitivity(float sensitivity);
-        Initializer& ZoomSpeed(float zoom_speed);
     };
 
     explicit SpectatorCameraManager(class Game& game, const Initializer& initializer = {});
@@ -49,6 +44,9 @@ class SpectatorCameraManager : public CameraManager {
 
     [[nodiscard]] MovementInput MovementInput() const;
     [[nodiscard]] class MovementInput& MovementInput();
+
+    [[nodiscard]] InputKey EnableLookInputKey() const;
+    [[nodiscard]] InputKey &EnableLookInputKey();
 
     [[nodiscard]] float Speed() const;
     bool Speed(float speed);
@@ -70,6 +68,7 @@ class SpectatorCameraManager : public CameraManager {
     std::reference_wrapper<Camera> camera_;
 
     class MovementInput movement_input_;
+    InputKey enable_look_input_key_;
     float speed_;
     float sensitivity_;
     float zoom_speed_;

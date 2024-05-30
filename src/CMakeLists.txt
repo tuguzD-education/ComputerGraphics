@@ -50,7 +50,8 @@ set(HEADER_LIST
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/triangle_component.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/mesh_component.hpp
         ${PROJECT_SOURCE_DIR}/include/computer_graphics/mesh_component.inl
-        ${PROJECT_SOURCE_DIR}/include/computer_graphics/box_component.hpp)
+        ${PROJECT_SOURCE_DIR}/include/computer_graphics/box_component.hpp
+        ../include/computer_graphics/projection.hpp)
 set(SOURCE_LIST
         delegate/delegate.cpp
         delegate/delegate_handle.cpp
@@ -79,7 +80,8 @@ set(SOURCE_LIST
         box_component.cpp
         debug_draw.cpp
         geometric_primitive_component.cpp
-        light.cpp)
+        light.cpp
+        projection.cpp)
 
 find_package(directxtk CONFIG REQUIRED)
 find_package(range-v3 CONFIG REQUIRED)

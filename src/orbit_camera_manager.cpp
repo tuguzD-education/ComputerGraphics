@@ -7,46 +7,16 @@ namespace computer_graphics {
 
 constexpr float OrbitCameraManager::min_distance = 1.5f;
 
-auto OrbitCameraManager::Initializer::Target(const SceneComponent& target) -> Initializer& {
-    this->target = target;
-    return *this;
-}
-
-auto OrbitCameraManager::Initializer::Camera(class Camera* camera) -> Initializer& {
-    this->camera = camera;
-    return *this;
-}
-
-auto OrbitCameraManager::Initializer::Distance(const float distance) -> Initializer& {
-    if (distance >= min_distance) {
-        this->distance = distance;
-    }
-    return *this;
-}
-
-auto OrbitCameraManager::Initializer::Sensitivity(const float sensitivity) -> Initializer& {
-    if (sensitivity >= 0.0f) {
-        this->sensitivity = sensitivity;
-    }
-    return *this;
-}
-
-auto OrbitCameraManager::Initializer::ZoomSpeed(const float zoom_speed) -> Initializer& {
-    if (zoom_speed >= 0.0f) {
-        this->zoom_speed = zoom_speed;
-    }
-    return *this;
-}
-
 OrbitCameraManager::OrbitCameraManager(class Game& game, const Initializer& initializer)
     : CameraManager(game),
       camera_{
           initializer.camera ? *initializer.camera
               : game.AddComponent<Camera>(Camera::Initializer{
-                  .projection_type = PerspectiveCameraProjectionType{}
+                  .projection = std::make_unique<PerspectiveProjection>()
               }),
       },
       target_{initializer.target},
+      enable_look_input_key_{initializer.enable_look_input_key},
       distance_{initializer.distance > min_distance ? initializer.distance
           : (camera_.get().Transform().position - target_.get().WorldTransform().position).Length()},
       sensitivity_{initializer.sensitivity},
@@ -61,6 +31,14 @@ OrbitCameraManager::~OrbitCameraManager() {
     if (const auto input = Game().Input(); input != nullptr) {
         input->OnMouseMove().RemoveByOwner(this);
     }
+}
+
+InputKey OrbitCameraManager::EnableLookInputKey() const {
+    return enable_look_input_key_;
+}
+
+InputKey& OrbitCameraManager::EnableLookInputKey() {
+    return enable_look_input_key_;
 }
 
 float OrbitCameraManager::Distance() const {
@@ -111,27 +89,33 @@ void OrbitCameraManager::Update(const float delta_time) {
     CameraManager::Update(delta_time);
 
     Transform& transform = camera_.get().Transform();
+    if (const Input* input = Game().Input();
+        enable_look_input_key_ == InputKey::None || (input != nullptr && input->IsKeyDown(enable_look_input_key_))) {
+        auto [pitch, yaw, roll] = transform.rotation.ToEuler();
+        yaw -= mouse_offset_.x * sensitivity_ * delta_time;
+        pitch -= mouse_offset_.y * sensitivity_ * delta_time;
 
-    auto [pitch, yaw, roll] = transform.rotation.ToEuler();
-    yaw -= mouse_offset_.x * sensitivity_ * delta_time;
-    pitch -= mouse_offset_.y * sensitivity_ * delta_time;
+        constexpr float max_pitch = std::numbers::pi_v<float> / 2.0f - 0.001f;
+        constexpr float min_pitch = -max_pitch;
+        pitch = std::clamp(pitch, min_pitch, max_pitch);
 
-    constexpr float max_pitch = std::numbers::pi_v<float> / 2.0f - 0.001f;
-    constexpr float min_pitch = -max_pitch;
-    pitch = std::clamp(pitch, min_pitch, max_pitch);
+        transform.rotation = math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
 
-    transform.rotation = math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
-    transform.position = target_.get().WorldTransform().position - transform.Forward() * distance_;
-    mouse_offset_ = math::Vector2::Zero;
-
-    distance_ -= static_cast<float>(wheel_delta_) * zoom_speed_ * delta_time;
-    if (distance_ < min_distance) {
-        distance_ = min_distance;
+        distance_ -= static_cast<float>(wheel_delta_) * zoom_speed_ * delta_time;
+        if (distance_ < min_distance) {
+            distance_ = min_distance;
+        }
     }
+    transform.position = target_.get().WorldTransform().position - transform.Forward() * distance_;
+
+    mouse_offset_ = math::Vector2::Zero;
     wheel_delta_ = 0;
 }
 
 void OrbitCameraManager::OnMouseMove(const MouseMoveData& data) {
+    if (const Window* window = Game().Window(); window == nullptr || !window->IsCursorInWindow()) {
+        return;
+    }
     mouse_offset_ += data.offset;
     wheel_delta_ += data.wheel_delta;
 }
