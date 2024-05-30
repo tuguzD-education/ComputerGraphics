@@ -8,8 +8,8 @@ computer_graphics::GeometricPrimitiveComponent& CreateNeptuneMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::SphereGeometricPrimitiveArguments{
-                .diameter = 0.75f,
+            computer_graphics::DodecahedronGeometricPrimitiveArguments{
+                .size = 0.75f,
             },
         .color = computer_graphics::math::colors::linear::BlueViolet.v,
     };

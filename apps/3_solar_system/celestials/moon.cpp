@@ -8,7 +8,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateMoonMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::TetrahedronGeometricPrimitiveArguments{
+            computer_graphics::OctahedronGeometricPrimitiveArguments{
                 .size = 0.1f,
             },
         .color = computer_graphics::math::colors::linear::LightGray.v,

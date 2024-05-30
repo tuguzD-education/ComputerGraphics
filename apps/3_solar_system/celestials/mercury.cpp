@@ -8,11 +8,11 @@ computer_graphics::GeometricPrimitiveComponent& CreateMercuryMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::TorusGeometricPrimitiveArguments{
-                .diameter = 0.2f,
-                .thickness = 0.1f,
+            computer_graphics::CylinderGeometricPrimitiveArguments{
+                .height = 0.25f,
+                .diameter = 0.25f,
             },
-        .color = computer_graphics::math::colors::linear::SlateGray.v,
+        .color = computer_graphics::math::colors::linear::LightSlateGray.v,
     };
     initializer.Parent(parent);
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);

@@ -8,8 +8,10 @@ computer_graphics::GeometricPrimitiveComponent& CreateUranusMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::SphereGeometricPrimitiveArguments{
+            computer_graphics::ConeGeometricPrimitiveArguments{
                 .diameter = 0.5f,
+                .height = 0.5f,
+                .tessellation = 8,
             },
         .color = computer_graphics::math::colors::linear::LightSkyBlue.v,
     };

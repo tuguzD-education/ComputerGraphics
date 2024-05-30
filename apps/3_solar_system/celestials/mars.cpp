@@ -11,7 +11,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateMarsMesh(
             computer_graphics::IcosahedronGeometricPrimitiveArguments{
                 .size = 0.25f,
             },
-        .color = computer_graphics::math::colors::linear::OrangeRed.v,
+        .color = computer_graphics::math::colors::linear::IndianRed.v,
     };
     initializer.Parent(parent);
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);

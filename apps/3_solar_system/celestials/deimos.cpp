@@ -8,8 +8,8 @@ computer_graphics::GeometricPrimitiveComponent& CreateDeimosMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::BoxGeometricPrimitiveArguments{
-                .size = computer_graphics::math::Vector3::One * 0.1f,
+            computer_graphics::TeapotGeometricPrimitiveArguments{
+                .size = 0.1f,
             },
         .color = computer_graphics::math::colors::linear::DarkRed.v,
     };

@@ -193,17 +193,29 @@ void Game::Update(const float delta_time) {
     const auto saturn_around_self =
         math::Quaternion::CreateFromAxisAngle(math::Vector3::One, 0.75f * delta_time);
     auto &saturn_mesh_rotation = saturn_.Mesh().Transform().rotation;
-    saturn_mesh_rotation = math::Quaternion::Concatenate(mars_mesh_rotation, saturn_around_self);
+    saturn_mesh_rotation = math::Quaternion::Concatenate(saturn_mesh_rotation, saturn_around_self);
 
     // Rotate the Uranus around the Sun
     const auto uranus_around_sun =
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Up, 0.07f * delta_time);
     uranus_.Transform().RotateAround(math::Vector3::Zero, uranus_around_sun);
 
+    // Rotate the Uranus around itself
+    const auto uranus_around_self =
+        math::Quaternion::CreateFromAxisAngle(math::Vector3::Forward, 0.5f * delta_time);
+    auto &uranus_mesh_rotation = uranus_.Mesh().Transform().rotation;
+    uranus_mesh_rotation = math::Quaternion::Concatenate(uranus_mesh_rotation, uranus_around_self);
+
     // Rotate the Neptune around the Sun
     const auto neptune_around_sun =
         math::Quaternion::CreateFromAxisAngle(math::Vector3::Up, 0.03f * delta_time);
     neptune_.Transform().RotateAround(math::Vector3::Zero, neptune_around_sun);
+
+    // Rotate the Neptune around itself
+    const auto neptune_around_self =
+        math::Quaternion::CreateFromAxisAngle(math::Vector3::Down, 0.4f * delta_time);
+    auto &neptune_mesh_rotation = neptune_.Mesh().Transform().rotation;
+    neptune_mesh_rotation = math::Quaternion::Concatenate(neptune_mesh_rotation, neptune_around_self);
 
     // Rotate the Sun around itself
     const math::Vector3 sun_axis = math::Normalize(math::Vector3::Right + math::Vector3::Forward);

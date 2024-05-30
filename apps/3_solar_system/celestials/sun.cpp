@@ -4,16 +4,18 @@
 
 namespace detail {
 
-computer_graphics::BoxComponent& CreateSunMesh(
+computer_graphics::GeometricPrimitiveComponent& CreateSunMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
-    computer_graphics::BoxComponent::Initializer initializer{
-        .length = 1.5f,
-        .height = 1.5f,
-        .width = 1.5f,
+    computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
+        .primitive_arguments =
+            computer_graphics::GeoSphereGeometricPrimitiveArguments{
+                .diameter = 2.0f,
+                .tessellation = 2,
+            },
         .color = computer_graphics::math::colors::linear::Yellow.v,
     };
     initializer.Parent(parent);
-    return game.AddComponent<computer_graphics::BoxComponent>(initializer);
+    return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 
 }  // namespace detail
@@ -21,11 +23,11 @@ computer_graphics::BoxComponent& CreateSunMesh(
 Sun::Sun(computer_graphics::Game& game, const Initializer& initializer)
     : SceneComponent(game, initializer), mesh_{detail::CreateSunMesh(Game(), this)} {}
 
-const computer_graphics::BoxComponent& Sun::Mesh() const {
+const computer_graphics::GeometricPrimitiveComponent& Sun::Mesh() const {
     return mesh_;
 }
 
-computer_graphics::BoxComponent& Sun::Mesh() {
+computer_graphics::GeometricPrimitiveComponent& Sun::Mesh() {
     return mesh_;
 }
 
