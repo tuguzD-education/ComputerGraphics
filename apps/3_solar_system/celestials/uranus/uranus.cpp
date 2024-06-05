@@ -15,7 +15,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateUranusMesh(
             },
         .color = computer_graphics::math::colors::linear::LightSkyBlue.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

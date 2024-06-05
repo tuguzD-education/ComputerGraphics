@@ -16,7 +16,6 @@
 
 namespace computer_graphics {
 
-class AmbientLightComponent;
 class DirectionalLightComponent;
 class PointLightComponent;
 
@@ -28,6 +27,8 @@ concept ConstComponentRange = RefWrapperRange<Range, const Component>;
 
 class Game {
   public:
+    static constexpr std::uint16_t shadow_map_resolution = 2048;
+
     explicit Game(Window &window, Input &input);
     virtual ~Game();
 
@@ -56,9 +57,6 @@ class Game {
     template <std::derived_from<class DebugDraw> T, typename... Args>
     T &DebugDraw(Args &&...args);
 
-    [[nodiscard]] const AmbientLightComponent &AmbientLight() const;
-    [[nodiscard]] AmbientLightComponent &AmbientLight();
-
     [[nodiscard]] const DirectionalLightComponent &DirectionalLight() const;
     [[nodiscard]] DirectionalLightComponent &DirectionalLight();
 
@@ -72,7 +70,8 @@ class Game {
     [[nodiscard]] std::uint32_t TargetHeight() const;
 
     [[nodiscard]] math::Vector3 ScreenToWorld(math::Point screen_point) const;
-    [[nodiscard]] math::Point WorldToScreen(math::Vector3 position, const Viewport *viewport = nullptr) const;
+    [[nodiscard]] math::Point WorldToScreen(
+        math::Vector3 position, const Viewport *viewport = nullptr) const;
 
     [[nodiscard]] const Timer &Timer() const;
 
@@ -108,6 +107,7 @@ class Game {
     void InitializeSwapChain(const class Window &window);
     void InitializeRenderTargetView();
     void InitializeDepthStencilView();
+    void InitializeShadowMapResources();
 
     void UpdateInternal(float delta_time);
     void DrawInternal();
@@ -119,11 +119,18 @@ class Game {
     std::unique_ptr<class CameraManager> camera_manager_;
     std::unique_ptr<class DebugDraw> debug_draw_;
 
-    std::unique_ptr<AmbientLightComponent> ambient_light_;
     std::unique_ptr<DirectionalLightComponent> directional_light_;
     std::unique_ptr<PointLightComponent> point_light_;
 
     std::vector<std::unique_ptr<Component>> components_;
+
+    detail::D3DPtr<ID3D11SamplerState> shadow_map_sampler_state_;
+    detail::D3DPtr<ID3D11RenderTargetView> shadow_map_render_target_view_;
+    detail::D3DPtr<ID3D11ShaderResourceView> shadow_map_shader_resource_view_;
+    detail::D3DPtr<ID3D11Texture2D> shadow_map_;
+
+    detail::D3DPtr<ID3D11DepthStencilView> shadow_map_depth_view_;
+    detail::D3DPtr<ID3D11Texture2D> shadow_map_depth_;
 
     class Timer timer_;
     Timer::Duration time_per_update_;

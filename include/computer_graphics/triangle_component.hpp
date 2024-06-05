@@ -28,25 +28,25 @@ class TriangleComponent : public SceneComponent {
         math::Vector2 tile_count = math::Vector2::One;
         Material material;
 
-        Initializer &Vertices(std::span<const Vertex> vertices);
-        Initializer &Indices(std::span<const Index> indices);
-        Initializer &Wireframe(bool wireframe);
-        Initializer &TexturePath(const std::filesystem::path &texture_path);
-        Initializer &TileCount(math::Vector2 tile_count);
-        Initializer &Material(const Material &material);
+        bool is_casting_shadow = true;
     };
 
     explicit TriangleComponent(class Game &game, const Initializer &initializer = {});
 
     void Load(std::span<const Vertex> vertices, std::span<const Index> indices);
-    void LoadTexture(const std::filesystem::path &texture_path, math::Vector2 tile_count = math::Vector2::One);
+    void LoadTexture(
+        const std::filesystem::path &texture_path, math::Vector2 tile_count = math::Vector2::One);
 
     [[nodiscard]] bool Wireframe() const;
     [[nodiscard]] bool &Wireframe();
 
+    [[nodiscard]] bool IsCastingShadow() const;
+    [[nodiscard]] bool &IsCastingShadow();
+
     [[nodiscard]] const Material &Material() const;
     [[nodiscard]] class Material &Material();
 
+    virtual void DrawInShadowMap(const Camera *camera);
     void Draw(const Camera *camera) override;
 
   protected:
@@ -54,7 +54,9 @@ class TriangleComponent : public SceneComponent {
         math::Matrix4x4 world;
         math::Matrix4x4 view;
         math::Matrix4x4 projection;
-        math::Vector2 tile_count = math::Vector2::One;
+
+        math::Matrix4x4 directional_light_shadow_map_view_projection;
+        alignas(16) math::Vector2 tile_count = math::Vector2::One;
     };
 
     struct alignas(16) PixelShaderConstantBuffer {
@@ -62,7 +64,6 @@ class TriangleComponent : public SceneComponent {
         math::Vector3 view_position;
         class Material material;
 
-        AmbientLight ambient_light;
         DirectionalLight directional_light;
         PointLight point_light;
     };
@@ -73,25 +74,36 @@ class TriangleComponent : public SceneComponent {
     detail::D3DPtr<ID3D11Buffer> index_buffer_;
     detail::D3DPtr<ID3D11Buffer> vertex_buffer_;
 
-    detail::D3DPtr<ID3D11SamplerState> sampler_state_;
+    detail::D3DPtr<ID3D11SamplerState> texture_sampler_state_;
     detail::D3DPtr<ID3D11ShaderResourceView> texture_;
 
+    detail::D3DPtr<ID3D11RasterizerState> shadow_map_rasterizer_state_;
     detail::D3DPtr<ID3D11RasterizerState> rasterizer_state_;
     detail::D3DPtr<ID3D11InputLayout> input_layout_;
 
+    detail::D3DPtr<ID3D11PixelShader> shadow_map_pixel_shader_;
+    detail::D3DPtr<ID3DBlob> shadow_map_pixel_shader_byte_code_;
+
+    detail::D3DPtr<ID3D11VertexShader> shadow_map_vertex_shader_;
+    detail::D3DPtr<ID3DBlob> shadow_map_vertex_shader_byte_code_;
+
     detail::D3DPtr<ID3D11Buffer> pixel_shader_constant_buffer_;
     detail::D3DPtr<ID3D11PixelShader> pixel_shader_;
-    detail::D3DPtr<ID3DBlob> pixel_byte_code_;
+    detail::D3DPtr<ID3DBlob> pixel_shader_byte_code_;
 
     detail::D3DPtr<ID3D11Buffer> vertex_shader_constant_buffer_;
     detail::D3DPtr<ID3D11VertexShader> vertex_shader_;
-    detail::D3DPtr<ID3DBlob> vertex_byte_code_;
+    detail::D3DPtr<ID3DBlob> vertex_shader_byte_code_;
+
+    math::Matrix4x4 directional_light_shadow_map_view_projection_;
 
     bool wireframe_;
     bool prev_wireframe_;
 
     math::Vector2 tile_count_;
     class Material material_;
+
+    bool is_casting_shadow_;
 
   private:
     void InitializeVertexShader();
@@ -100,9 +112,13 @@ class TriangleComponent : public SceneComponent {
     void InitializePixelShader();
     void InitializePixelShaderConstantBuffer();
 
+    void InitializeShadowMapVertexShader();
+    void InitializeShadowMapPixelShader();
+    void InitializeShadowMapRasterizerState();
+
     void InitializeInputLayout();
     void InitializeRasterizerState();
-    void InitializeSamplerState();
+    void InitializeTextureSamplerState();
 
     void InitializeVertexBuffer(std::span<const Vertex> vertices);
     void InitializeIndexBuffer(std::span<const Index> indices);

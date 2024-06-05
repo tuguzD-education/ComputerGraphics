@@ -17,25 +17,25 @@ class Background final : public computer_graphics::BoxComponent {
 
 inline Background::Background(computer_graphics::Game &game)
     : BoxComponent(game, Initializer{}) {
-    vertex_byte_code_ = computer_graphics::detail::ShaderFromFile(
-       "resources/shaders/chess.hlsl", nullptr /*macros*/,
-       D3D_COMPILE_STANDARD_FILE_INCLUDE /*include*/, "VSMain", "vs_5_0",
-       D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
+    vertex_shader_byte_code_ = computer_graphics::detail::ShaderFromFile(
+        "resources/shaders/chess.hlsl", nullptr,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE, "VSMain", "vs_5_0",
+        D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
     HRESULT result = Device().CreateVertexShader(
-        vertex_byte_code_->GetBufferPointer(),
-        vertex_byte_code_->GetBufferSize(),
+        vertex_shader_byte_code_->GetBufferPointer(),
+        vertex_shader_byte_code_->GetBufferSize(),
         nullptr, &vertex_shader_);
     computer_graphics::detail::CheckResult(result, "Failed to create vertex shader from byte code");
 
-    pixel_byte_code_ = computer_graphics::detail::ShaderFromFile(
-        "resources/shaders/chess.hlsl", nullptr /*macros*/,
-        D3D_COMPILE_STANDARD_FILE_INCLUDE /*include*/, "PSMain", "ps_5_0",
+    pixel_shader_byte_code_ = computer_graphics::detail::ShaderFromFile(
+        "resources/shaders/chess.hlsl", nullptr,
+        D3D_COMPILE_STANDARD_FILE_INCLUDE, "PSMain", "ps_5_0",
         D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, 0);
 
     result = Device().CreatePixelShader(
-        pixel_byte_code_->GetBufferPointer(),
-        pixel_byte_code_->GetBufferSize(),
+        pixel_shader_byte_code_->GetBufferPointer(),
+        pixel_shader_byte_code_->GetBufferSize(),
         nullptr, &pixel_shader_);
     computer_graphics::detail::CheckResult(result, "Failed to create index shader from byte code");
 }

@@ -12,7 +12,7 @@ computer_graphics::BoxComponent& CreateEarthMesh(
         .width = 0.5f,
         .color = computer_graphics::math::colors::linear::SpringGreen.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::BoxComponent>(initializer);
 }
 

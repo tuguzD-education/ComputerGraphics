@@ -225,34 +225,9 @@ GeometricPrimitiveArguments PrimitiveArguments(const GeometricPrimitiveType prim
     }
 }
 
-auto GeometricPrimitiveComponent::Initializer::PrimitiveArguments(const GeometricPrimitiveArguments &arguments)
-    -> Initializer & {
-    this->primitive_arguments = arguments;
-    return *this;
-}
-
-auto GeometricPrimitiveComponent::Initializer::PrimitiveType(const GeometricPrimitiveType type) -> Initializer & {
-    this->primitive_arguments = computer_graphics::PrimitiveArguments(type);
-    return *this;
-}
-
-auto GeometricPrimitiveComponent::Initializer::Color(const math::Color color) -> Initializer & {
-    this->color = color;
-    return *this;
-}
-
-auto GeometricPrimitiveComponent::Initializer::TexturePath(const std::filesystem::path &texture_path) -> Initializer & {
-    this->texture_path = texture_path;
-    return *this;
-}
-
-auto GeometricPrimitiveComponent::Initializer::Wireframe(const bool wireframe) -> Initializer & {
-    this->wireframe = wireframe;
-    return *this;
-}
-
 GeometricPrimitiveComponent::GeometricPrimitiveComponent(class Game &game, const Initializer &initializer)
-    : SceneComponent(game, initializer), color_{initializer.color}, wireframe_{initializer.wireframe},
+    : SceneComponent(game, initializer),
+      color_{initializer.color}, wireframe_{initializer.wireframe},
       primitive_{CreatePrimitive(&DeviceContext(), initializer.primitive_arguments)},
       primitive_arguments_{initializer.primitive_arguments} {
     LoadTexture(initializer.texture_path);
@@ -279,10 +254,7 @@ GeometricPrimitive &GeometricPrimitiveComponent::Primitive(GeometricPrimitiveTyp
 }
 
 void GeometricPrimitiveComponent::LoadTexture(const std::filesystem::path &texture_path) {
-    if (!texture_path.has_filename()) {
-        return;
-    }
-
+    if (!texture_path.has_filename()) return;
     texture_ = detail::TextureFromFile(Device(), DeviceContext(), texture_path);
 }
 
@@ -320,12 +292,24 @@ void GeometricPrimitiveComponent::Draw(const Camera *camera) {
     const auto effect = std::make_unique<DirectX::BasicEffect>(&Device());
     effect->SetColorAndAlpha(color_);
     effect->SetMatrices(world, view, projection);
+
+    const DirectionalLightComponent &directional_light_component = Game().DirectionalLight();
+    const DirectionalLight directional_light = directional_light_component.DirectionalLight();
+    effect->SetLightDiffuseColor(0, directional_light.diffuse);
+    effect->SetLightSpecularColor(0, directional_light.specular);
+    effect->SetLightEnabled(0, directional_light_component.IsLightEnabled());
+
+    const PointLightComponent &point_light_component = Game().PointLight();
+    PointLight point_light = point_light_component.PointLight();
+    effect->SetLightDiffuseColor(1, point_light.diffuse);
+    effect->SetLightSpecularColor(1, point_light.specular);
+    effect->SetLightEnabled(1, point_light_component.IsLightEnabled());
+
+    const math::Color ambient_color = directional_light.ambient + point_light.ambient;
+    effect->SetAmbientLightColor(ambient_color);
     effect->SetLightingEnabled(true);
     effect->SetPerPixelLighting(true);
-    effect->SetLightEnabled(0, false);
-    effect->SetLightEnabled(1, false);
-    effect->SetLightEnabled(2, false);
-    effect->SetAmbientLightColor(Game().AmbientLight().Primitive().color);
+
     if (texture_ != nullptr) {
         effect->SetTexture(texture_.Get());
         effect->SetTextureEnabled(true);

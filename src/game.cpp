@@ -6,7 +6,9 @@
 #include "computer_graphics/camera.hpp"
 #include "computer_graphics/camera_manager.hpp"
 #include "computer_graphics/detail/check_result.hpp"
+#include "computer_graphics/detail/shader.hpp"
 #include "computer_graphics/light.hpp"
+#include "computer_graphics/triangle_component.hpp"
 #include "computer_graphics/viewport_manager.hpp"
 
 namespace computer_graphics {
@@ -14,23 +16,21 @@ namespace computer_graphics {
 constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{6500};
 
 Game::Game(class Window &window, class Input &input)
-    : window_{window},
-      input_{input},
-      time_per_update_{default_time_per_update},
-      target_width_{},
-      target_height_{},
-      should_exit_{},
-      is_running_{} {
+    : window_{window}, input_{input}, time_per_update_{default_time_per_update},
+      target_width_{}, target_height_{}, should_exit_{}, is_running_{} {
     InitializeDevice();
     InitializeSwapChain(window);
     InitializeRenderTargetView();
     InitializeDepthStencilView();
+    InitializeShadowMapResources();
 
     ViewportManager<class ViewportManager>();
     DebugDraw<class DebugDraw>();
 
-    ambient_light_ = std::make_unique<AmbientLightComponent>(*this);
     directional_light_ = std::make_unique<DirectionalLightComponent>(*this);
+    directional_light_->IsLightEnabled() = true;
+    directional_light_->Ambient() = math::Color{math::colors::linear::White};
+
     point_light_ = std::make_unique<PointLightComponent>(*this);
 
     window_.OnResize().AddRaw(this, &Game::OnWindowResize);
@@ -84,14 +84,6 @@ DebugDraw &Game::DebugDraw() {
     return *debug_draw_;
 }
 
-const AmbientLightComponent &Game::AmbientLight() const {
-    return *ambient_light_;
-}
-
-AmbientLightComponent &Game::AmbientLight() {
-    return *ambient_light_;
-}
-
 const DirectionalLightComponent &Game::DirectionalLight() const {
     return *directional_light_;
 }
@@ -136,7 +128,7 @@ math::Vector3 Game::ScreenToWorld(const math::Point screen_point) const {
 
     auto contains = [x, y](const Viewport &viewport) {
         return (viewport.x <= x && x < viewport.x + viewport.width) &&
-               (viewport.y <= y && y < viewport.y + viewport.height);
+            (viewport.y <= y && y < viewport.y + viewport.height);
     };
 
     for (const Viewport &viewport : ViewportManager().Viewports()) {
@@ -156,10 +148,7 @@ math::Vector3 Game::ScreenToWorld(const math::Point screen_point) const {
 math::Point Game::WorldToScreen(const math::Vector3 position, const Viewport *viewport) const {
     const Viewport &viewport_ref = (viewport != nullptr) ? *viewport : ViewportManager().TargetViewport();
     if (viewport_ref.camera == nullptr) {
-        return math::Point{
-            .x = -1,
-            .y = -1,
-        };
+        return math::Point{ .x = -1, .y = -1, };
     }
 
     const math::Matrix4x4 projection = viewport_ref.camera->ProjectionMatrix();
@@ -361,6 +350,71 @@ void Game::InitializeDepthStencilView() {
     detail::CheckResult(result, "Failed to create depth stencil view");
 }
 
+void Game::InitializeShadowMapResources() {
+    constexpr D3D11_TEXTURE2D_DESC shadow_map_depth_desc{
+        .Width = shadow_map_resolution,
+        .Height = shadow_map_resolution,
+        .MipLevels = 1,
+        .ArraySize = 1,
+        .Format = DXGI_FORMAT_R32_TYPELESS,
+        .SampleDesc =
+            DXGI_SAMPLE_DESC{
+                .Count = 1,
+                .Quality = 0,
+            },
+        .Usage = D3D11_USAGE_DEFAULT,
+        .BindFlags = D3D11_BIND_DEPTH_STENCIL,
+    };
+    HRESULT result = device_->CreateTexture2D(&shadow_map_depth_desc, nullptr, &shadow_map_depth_);
+    detail::CheckResult(result, "Failed to create shadow map depth");
+
+    constexpr D3D11_DEPTH_STENCIL_VIEW_DESC shadow_map_depth_stencil_view_desc{
+        .Format = DXGI_FORMAT_D32_FLOAT,
+        .ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DARRAY,
+        .Texture2DArray = D3D11_TEX2D_ARRAY_DSV{ .ArraySize = 1 },
+    };
+    result = device_->CreateDepthStencilView(
+        shadow_map_depth_.Get(), &shadow_map_depth_stencil_view_desc, &shadow_map_depth_view_);
+    detail::CheckResult(result, "Failed to create shadow map depth stencil view");
+
+    constexpr D3D11_TEXTURE2D_DESC shadow_map_desc{
+        .Width = shadow_map_resolution,
+        .Height = shadow_map_resolution,
+        .MipLevels = 1,
+        .ArraySize = 1,
+        .Format = DXGI_FORMAT_R32G32B32A32_FLOAT,
+        .SampleDesc =
+            DXGI_SAMPLE_DESC{
+                .Count = 1,
+                .Quality = 0,
+            },
+        .Usage = D3D11_USAGE_DEFAULT,
+        .BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET,
+    };
+    result = device_->CreateTexture2D(&shadow_map_desc, nullptr, &shadow_map_);
+    detail::CheckResult(result, "Failed to create shadow map");
+
+    result = device_->CreateShaderResourceView(
+        shadow_map_.Get(), nullptr, &shadow_map_shader_resource_view_);
+    detail::CheckResult(result, "Failed to create shadow map shader resource view");
+
+    result = device_->CreateRenderTargetView(
+        shadow_map_.Get(), nullptr, &shadow_map_render_target_view_);
+    detail::CheckResult(result, "Failed to create shadow map render target view");
+
+    constexpr D3D11_SAMPLER_DESC shadow_map_sampler_desc{
+        .Filter = D3D11_FILTER_ANISOTROPIC,
+        .AddressU = D3D11_TEXTURE_ADDRESS_CLAMP,
+        .AddressV = D3D11_TEXTURE_ADDRESS_CLAMP,
+        .AddressW = D3D11_TEXTURE_ADDRESS_CLAMP,
+        .ComparisonFunc = D3D11_COMPARISON_ALWAYS,
+        .BorderColor = {0.0f, 0.0f, 0.0f, 0.0f},
+        .MaxLOD = D3D11_FLOAT32_MAX,
+    };
+    result = device_->CreateSamplerState(&shadow_map_sampler_desc, &shadow_map_sampler_state_);
+    detail::CheckResult(result, "Failed to create shadow map sampler state");
+}
+
 void Game::UpdateInternal(const float delta_time) {
     Update(delta_time);
 
@@ -379,20 +433,58 @@ void Game::Update(const float delta_time) {
 
 void Game::DrawInternal() {
     device_context_->ClearState();
-
-    const std::array render_targets{render_target_view_.Get()};
-    device_context_->OMSetRenderTargets(
-        render_targets.size(), render_targets.data(), nullptr);
-    device_context_->OMSetDepthStencilState(depth_stencil_state_.Get(), 1);
-
     device_context_->ClearRenderTargetView(render_target_view_.Get(), clear_color_);
     device_context_->ClearDepthStencilView(
         depth_stencil_view_.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     for (const auto &viewport : viewport_manager_->Viewports()) {
+        Camera *const camera = viewport.camera;
+
+        device_context_->ClearState();
+
+        const std::array shadow_map_render_targets{shadow_map_render_target_view_.Get()};
+        device_context_->OMSetRenderTargets(shadow_map_render_targets.size(),
+            shadow_map_render_targets.data(), shadow_map_depth_view_.Get());
+
+        device_context_->ClearRenderTargetView(
+            shadow_map_render_target_view_.Get(), math::colors::linear::White);
+        device_context_->ClearDepthStencilView(shadow_map_depth_view_.Get(),
+            D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+        const math::Viewport shadow_map_viewport{
+            viewport.x, viewport.y, shadow_map_resolution,
+            shadow_map_resolution, viewport.minDepth, viewport.maxDepth,
+        };
+        device_context_->RSSetViewports(1, shadow_map_viewport.Get11());
+
+        auto is_triangle = [](const Component &component) {
+            return dynamic_cast<const TriangleComponent *>(&component) != nullptr;
+        };
+        auto to_triangle = [](Component &component) -> TriangleComponent & {
+            return dynamic_cast<TriangleComponent &>(component);
+        };
+        // ReSharper disable once CppTooWideScopeInitStatement
+        auto triangle_components =
+            Components() | std::views::filter(is_triangle) | std::views::transform(to_triangle);
+        for (TriangleComponent &component : triangle_components) {
+            component.DrawInShadowMap(camera);
+        }
+        device_context_->ClearState();
+
+        const std::array render_targets{render_target_view_.Get()};
+        device_context_->OMSetRenderTargets(render_targets.size(),
+            render_targets.data(), depth_stencil_view_.Get());
+        device_context_->OMSetDepthStencilState(depth_stencil_state_.Get(), 1);
+
+        const std::array shader_resources{shadow_map_shader_resource_view_.Get()};
+        device_context_->PSSetShaderResources(0,
+            shader_resources.size(), shader_resources.data());
+
+        const std::array samplers{shadow_map_sampler_state_.Get()};
+        device_context_->PSSetSamplers(0, samplers.size(), samplers.data());
+
         device_context_->RSSetViewports(1, viewport.Get11());
 
-        const Camera *camera = viewport.camera;
         Draw(camera);
         debug_draw_->Draw(camera);
     }
@@ -409,7 +501,7 @@ void Game::DrawInternal() {
     device_context_->OMSetDepthStencilState(nullptr, 1);
 
     const HRESULT result = swap_chain_->Present(1, /*DXGI_PRESENT_DO_NOT_WAIT*/ 0);
-    detail::CheckResult(result, "Failed to present to swap chain");
+    detail::CheckResult(result, "Failed to present into swapchain");
 }
 
 void Game::Draw() {}

@@ -1,63 +1,140 @@
 #include "computer_graphics/light.hpp"
 
+#include <array>
+
+#include "computer_graphics/camera.hpp"
+#include "computer_graphics/projection.hpp"
+
 namespace computer_graphics {
 
-AmbientLightComponent::AmbientLightComponent(class Game& game, const Initializer& initializer)
-    : Component(game, initializer), light_{initializer.light} {}
+LightComponent::LightComponent(class Game& game, const Initializer& initializer)
+    : SceneComponent(game, initializer), light_{initializer.light},
+      is_enabled_{initializer.is_light_enabled} {}
 
-const AmbientLightComponent::PrimitiveType& AmbientLightComponent::Primitive() const noexcept {
-    return light_;
+bool LightComponent::IsLightEnabled() const {
+    return is_enabled_;
 }
 
-AmbientLightComponent::PrimitiveType& AmbientLightComponent::Primitive() noexcept {
-    return light_;
+bool& LightComponent::IsLightEnabled() {
+    return is_enabled_;
+}
+
+math::Color LightComponent::Ambient() const {
+    return light_.ambient;
+}
+
+math::Color& LightComponent::Ambient() {
+    return light_.ambient;
+}
+
+math::Color LightComponent::Diffuse() const {
+    return light_.diffuse;
+}
+
+math::Color& LightComponent::Diffuse() {
+    return light_.diffuse;
+}
+
+math::Color LightComponent::Specular() const {
+    return light_.specular;
+}
+
+math::Color& LightComponent::Specular() {
+    return light_.specular;
+}
+
+Light LightComponent::Light() const {
+    const math::Color disabled_color{math::colors::linear::Black};
+    return {
+        .ambient = is_enabled_ ? light_.ambient : disabled_color,
+        .diffuse = is_enabled_ ? light_.diffuse : disabled_color,
+        .specular = is_enabled_ ? light_.specular : disabled_color,
+    };
+}
+
+math::Vector3 DirectionalLightComponent::Initializer::Direction() const {
+    return transform.Forward();
+}
+
+void DirectionalLightComponent::Initializer::Direction(const math::Vector3& direction) {
+    transform.rotation = math::Quaternion::LookRotation(direction, math::Vector3::Zero);
 }
 
 DirectionalLightComponent::DirectionalLightComponent(class Game& game, const Initializer& initializer)
-    : Component(game, initializer), light_{initializer.light} {}
+    : LightComponent(game, initializer) {}
 
-const DirectionalLightComponent::PrimitiveType& DirectionalLightComponent::Primitive() const noexcept {
-    return light_;
+math::Vector3 DirectionalLightComponent::Direction() const {
+    return Transform().Forward();
 }
 
-DirectionalLightComponent::PrimitiveType& DirectionalLightComponent::Primitive() noexcept {
-    return light_;
+void DirectionalLightComponent::Direction(const math::Vector3& direction) {
+    Transform().rotation = math::Quaternion::LookRotation(direction, math::Vector3::Zero);
 }
 
-auto PointLightComponent::Initializer::Color(const math::Color color) -> Initializer& {
-    this->color = color;
-    return *this;
+DirectionalLight DirectionalLightComponent::DirectionalLight() const {
+    const auto [ambient, diffuse, specular] = Light();
+
+    class DirectionalLight directional_light = {
+        .direction = Direction(),
+    };
+    directional_light.ambient = ambient;
+    directional_light.diffuse = diffuse;
+    directional_light.specular = specular;
+    return directional_light;
 }
 
-auto PointLightComponent::Initializer::Attenuation(const class Attenuation& attenuation) -> Initializer& {
-    this->attenuation = attenuation;
-    return *this;
+math::Matrix4x4 DirectionalLightComponent::ViewMatrix(const Camera* camera) const {
+    const math::Frustum camera_frustum = camera != nullptr ? camera->Frustum() : math::Frustum{};
+
+    std::array<math::Vector3, 8> frustum_corners;
+    camera_frustum.GetCorners(frustum_corners.data());
+
+    math::Vector3 frustum_center;
+    for (const math::Vector3& corner : frustum_corners) {
+        frustum_center += corner;
+    }
+    frustum_center /= static_cast<float>(frustum_corners.size());
+
+    const math::Vector3 eye = frustum_center;
+    const math::Vector3 target = frustum_center + Transform().Forward();
+    const math::Vector3 up = Transform().Up();
+    return math::Matrix4x4::CreateLookAt(eye, target, up);
+}
+
+math::Matrix4x4 DirectionalLightComponent::ProjectionMatrix(const Camera* camera) const {
+    const math::Frustum camera_frustum = camera != nullptr ? camera->Frustum() : math::Frustum{};
+
+    std::array<math::Vector3, 8> frustum_corners;
+    camera_frustum.GetCorners(frustum_corners.data());
+
+    const math::Matrix4x4 light_view = ViewMatrix(camera);
+
+    float left = (std::numeric_limits<float>::max)();
+    float right = std::numeric_limits<float>::lowest();
+    float bottom = (std::numeric_limits<float>::max)();
+    float top = std::numeric_limits<float>::lowest();
+    float near_plane = (std::numeric_limits<float>::max)();
+    float far_plane = std::numeric_limits<float>::lowest();
+    for (const math::Vector3& corner : frustum_corners) {
+        const auto trf = math::Vector3::Transform(corner, light_view);
+        left = (std::min)(left, trf.x);
+        right = (std::max)(right, trf.x);
+        bottom = (std::min)(bottom, trf.y);
+        top = (std::max)(top, trf.y);
+        near_plane = (std::min)(near_plane, trf.z);
+        far_plane = (std::max)(far_plane, trf.z);
+    }
+
+    // how much geometry to include from outside the view frustum?
+    constexpr float z_mult = 10.0f;
+    near_plane = (near_plane < 0) ? near_plane * z_mult : near_plane / z_mult;
+    far_plane = (far_plane < 0) ? far_plane / z_mult : far_plane * z_mult;
+
+    return math::Matrix4x4::CreateOrthographicOffCenter(left, right, bottom, top, near_plane, far_plane);
 }
 
 PointLightComponent::PointLightComponent(class Game& game, const Initializer& initializer)
-    : SceneComponent(game, initializer), color_{initializer.color}, attenuation_{initializer.attenuation} {}
-
-PointLightComponent::PrimitiveType PointLightComponent::Primitive() const {
-    const auto [position, rotation, scale] = WorldTransform();
-    const class Attenuation attenuation {
-        .const_factor = attenuation_.const_factor * math::Color{scale},
-        .linear_factor = attenuation_.linear_factor * math::Color{scale},
-        .quad_factor = attenuation_.quad_factor * math::Color{scale},
-    };
-    return PointLight{
-        .position = position,
-        .color = color_,
-        .attenuation = attenuation,
-    };
-}
-
-math::Color PointLightComponent::Color() const {
-    return color_;
-}
-
-math::Color& PointLightComponent::Color() {
-    return color_;
-}
+    : LightComponent(game, initializer), attenuation_{initializer.attenuation} {}
 
 const Attenuation& PointLightComponent::Attenuation() const {
     return attenuation_;
@@ -65,6 +142,35 @@ const Attenuation& PointLightComponent::Attenuation() const {
 
 Attenuation& PointLightComponent::Attenuation() {
     return attenuation_;
+}
+
+PointLight PointLightComponent::PointLight() const {
+    const auto [ambient, diffuse, specular] = Light();
+    const auto [position, rotation, scale] = WorldTransform();
+    const class Attenuation attenuation {
+        .const_factor = attenuation_.const_factor * math::Color{scale},
+        .linear_factor = attenuation_.linear_factor * math::Color{scale},
+        .quad_factor = attenuation_.quad_factor * math::Color{scale},
+    };
+
+    class PointLight point_light = {
+        .position = position,
+        .attenuation = attenuation,
+    };
+    point_light.ambient = ambient;
+    point_light.diffuse = diffuse;
+    point_light.specular = specular;
+    return point_light;
+}
+
+math::Matrix4x4 PointLightComponent::ViewMatrix(const Camera* camera) const {
+    // TODO
+    return math::Matrix4x4::Identity;
+}
+
+math::Matrix4x4 PointLightComponent::ProjectionMatrix(const Camera* camera) const {
+    // TODO
+    return math::Matrix4x4::Identity;
 }
 
 }  // namespace computer_graphics

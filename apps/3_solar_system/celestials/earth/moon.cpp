@@ -13,7 +13,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateMoonMesh(
             },
         .color = computer_graphics::math::colors::linear::LightGray.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

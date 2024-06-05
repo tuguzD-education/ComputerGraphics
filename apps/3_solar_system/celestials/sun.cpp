@@ -14,7 +14,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateSunMesh(
             },
         .color = computer_graphics::math::colors::linear::Yellow.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

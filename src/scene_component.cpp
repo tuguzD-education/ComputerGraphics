@@ -2,16 +2,6 @@
 
 namespace computer_graphics {
 
-auto SceneComponent::Initializer::Transform(const computer_graphics::Transform &transform) -> Initializer & {
-    this->transform = transform;
-    return *this;
-}
-
-auto SceneComponent::Initializer::Parent(const SceneComponent *parent) -> Initializer & {
-    this->parent = parent;
-    return *this;
-}
-
 SceneComponent::SceneComponent(class Game &game, const Initializer &initializer)
     : Component(game, initializer), transform_{initializer.transform}, parent_{initializer.parent} {
     if (initializer.name == "component") {
@@ -65,9 +55,7 @@ bool SceneComponent::IsParentOf(const SceneComponent &scene_component, const std
 bool SceneComponent::IsChildOf(const SceneComponent &scene_component, std::size_t max_depth) const {
     const SceneComponent *parent = Parent();
     while (parent != nullptr && max_depth > 0) {
-        if (&scene_component == parent) {
-            return true;
-        }
+        if (&scene_component == parent) return true;
         parent = parent->Parent();
         max_depth -= 1;
     }

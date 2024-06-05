@@ -15,12 +15,11 @@ computer_graphics::GeometricPrimitiveComponent& CreateVenusMesh(
             },
         .color = computer_graphics::math::colors::linear::LightGoldenrodYellow.v,
     };
-    initializer
-        .Transform({
-            .rotation = computer_graphics::math::Quaternion::CreateFromAxisAngle(
-                computer_graphics::math::Vector3::Right, std::numbers::pi_v<float> / 2.0f),
-        })
-        .Parent(parent);
+    initializer.transform = computer_graphics::Transform{
+        .rotation = computer_graphics::math::Quaternion::CreateFromAxisAngle(
+            computer_graphics::math::Vector3::Right, std::numbers::pi_v<float> / 2.0f),
+    };
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

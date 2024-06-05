@@ -14,7 +14,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateSaturnRingMesh(
             },
         .color = computer_graphics::math::colors::linear::SandyBrown.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

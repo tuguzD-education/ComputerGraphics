@@ -13,7 +13,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateMarsMesh(
             },
         .color = computer_graphics::math::colors::linear::IndianRed.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 

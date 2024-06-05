@@ -12,7 +12,7 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
               computer_graphics::Camera::Initializer initializer{
                   .projection = std::make_unique<computer_graphics::PerspectiveProjection>(),
               };
-              initializer.Transform({
+              initializer.transform = computer_graphics::Transform({
                   .position = computer_graphics::math::Vector3{0.0f, 6.0f, 6.0f},
                   .rotation = computer_graphics::math::Quaternion::CreateFromYawPitchRoll(
                       0.0f, -std::numbers::pi_v<float> / 4.0f, 0.0f),

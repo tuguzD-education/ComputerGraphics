@@ -14,7 +14,7 @@ computer_graphics::GeometricPrimitiveComponent& CreateUranusRingMesh(
             },
         .color = computer_graphics::math::colors::linear::GhostWhite.v,
     };
-    initializer.Parent(parent);
+    initializer.parent = parent;
     return game.AddComponent<computer_graphics::GeometricPrimitiveComponent>(initializer);
 }
 
