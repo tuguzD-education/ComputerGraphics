@@ -15,7 +15,7 @@ class Background final : public computer_graphics::BoxComponent {
     explicit Background(computer_graphics::Game& game);
 };
 
-inline Background::Background(computer_graphics::Game &game)
+inline Background::Background(computer_graphics::Game& game)
     : BoxComponent(game, Initializer{}) {
     vertex_shader_byte_code_ = computer_graphics::detail::ShaderFromFile(
         "resources/shaders/chess.hlsl", nullptr,
@@ -40,4 +40,4 @@ inline Background::Background(computer_graphics::Game &game)
     computer_graphics::detail::CheckResult(result, "Failed to create index shader from byte code");
 }
 
-#endif //FIELD_HPP_INCLUDED
+#endif  // FIELD_HPP_INCLUDED

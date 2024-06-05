@@ -17,7 +17,7 @@ constexpr Timer::Duration default_time_per_update = std::chrono::microseconds{65
 
 Game::Game(class Window &window, class Input &input)
     : window_{window}, input_{input}, time_per_update_{default_time_per_update},
-      target_width_{}, target_height_{}, should_exit_{}, is_running_{} {
+      target_width_{}, target_height_{}, should_exit_{}, is_running_{}, depth_testing_enabled_{true} {
     InitializeDevice();
     InitializeSwapChain(window);
     InitializeRenderTargetView();
@@ -54,6 +54,15 @@ const math::Color &Game::ClearColor() const {
 
 math::Color &Game::ClearColor() {
     return clear_color_;
+}
+
+bool Game::DepthTestingEnabled() const {
+    return depth_testing_enabled_;
+}
+
+void Game::DepthTestingEnabled(const bool enabled) {
+    depth_testing_enabled_ = enabled;
+    InitializeDepthStencilView();
 }
 
 const CameraManager *Game::CameraManager() const {
@@ -321,8 +330,8 @@ void Game::InitializeDepthStencilView() {
     HRESULT result = device_->CreateTexture2D(&depth_buffer_desc, nullptr, &depth_buffer_);
     detail::CheckResult(result, "Failed to create depth buffer");
 
-    constexpr D3D11_DEPTH_STENCIL_DESC depth_stencil_desc{
-        .DepthEnable = true,
+    const D3D11_DEPTH_STENCIL_DESC depth_stencil_desc{
+        .DepthEnable = depth_testing_enabled_,
         .DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL,
         .DepthFunc = D3D11_COMPARISON_LESS,
         .StencilEnable = false,

@@ -38,6 +38,9 @@ class Game {
     [[nodiscard]] const math::Color &ClearColor() const;
     [[nodiscard]] math::Color &ClearColor();
 
+    [[nodiscard]] bool DepthTestingEnabled() const;
+    void DepthTestingEnabled(bool enabled);
+
     [[nodiscard]] const CameraManager *CameraManager() const;
     [[nodiscard]] class CameraManager *CameraManager();
 
@@ -141,6 +144,7 @@ class Game {
     math::Color clear_color_;
     bool should_exit_;
     bool is_running_;
+    bool depth_testing_enabled_;
 
     detail::D3DPtr<ID3D11DepthStencilView> depth_stencil_view_;
     detail::D3DPtr<ID3D11DepthStencilState> depth_stencil_state_;

@@ -67,6 +67,7 @@ inline Game::Game(computer_graphics::Window &window, computer_graphics::Input &i
           return initializer;
       }())} {
     input.OnInputKeyDown().AddRaw(this, &Game::OnKeyDown);
+    DepthTestingEnabled(false);
 }
 
 inline void Game::Update(const float delta_time) {
