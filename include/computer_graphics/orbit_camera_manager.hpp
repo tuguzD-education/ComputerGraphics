@@ -42,6 +42,8 @@ class OrbitCameraManager : public CameraManager {
 
     void Update(float delta_time) override;
 
+    void FitToTarget(float size);
+
   private:
     void OnMouseMove(const MouseMoveData &data);
 

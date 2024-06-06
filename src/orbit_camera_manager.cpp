@@ -1,11 +1,13 @@
 #include "computer_graphics/orbit_camera_manager.hpp"
 
+#include <iostream>
+
 #include "computer_graphics/camera.hpp"
 #include "computer_graphics/game.hpp"
 
 namespace computer_graphics {
 
-constexpr float OrbitCameraManager::min_distance = 1.5f;
+constexpr float OrbitCameraManager::min_distance = 0.75f;
 
 OrbitCameraManager::OrbitCameraManager(class Game& game, const Initializer& initializer)
     : CameraManager(game),
@@ -25,6 +27,7 @@ OrbitCameraManager::OrbitCameraManager(class Game& game, const Initializer& init
     if (const auto input = Game().Input(); input != nullptr) {
         input->OnMouseMove().AddRaw(this, &OrbitCameraManager::OnMouseMove);
     }
+    FitToTarget(0.75f);
 }
 
 OrbitCameraManager::~OrbitCameraManager() {
@@ -102,14 +105,21 @@ void OrbitCameraManager::Update(const float delta_time) {
         transform.rotation = math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
 
         distance_ -= static_cast<float>(wheel_delta_) * zoom_speed_ * delta_time;
-        if (distance_ < min_distance) {
-            distance_ = min_distance;
-        }
+        // if (distance_ < min_distance) {
+        //     distance_ = min_distance;
+        // }
     }
     transform.position = target_.get().WorldTransform().position - transform.Forward() * distance_;
 
     mouse_offset_ = math::Vector2::Zero;
     wheel_delta_ = 0;
+}
+
+void OrbitCameraManager::FitToTarget(const float size = 0.75f) {
+    auto distance = size / (2.0f * std::tan(
+        reinterpret_cast<PerspectiveProjection&>(camera_.get().Projection()).HorizontalFOV() / 2.0f));
+
+    distance_ = distance + size;
 }
 
 void OrbitCameraManager::OnMouseMove(const MouseMoveData& data) {
