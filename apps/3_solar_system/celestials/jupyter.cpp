@@ -41,6 +41,6 @@ bool Jupyter::Intersects(const computer_graphics::math::Ray& ray, float& dist) c
 computer_graphics::SphereCollision Jupyter::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.5f};
+    const computer_graphics::math::Sphere sphere{position, 0.475f};
     return computer_graphics::SphereCollision{sphere};
 }

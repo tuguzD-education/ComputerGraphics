@@ -45,7 +45,7 @@ computer_graphics::BoxCollision Sun::CollisionPrimitive() const {
 
     const computer_graphics::math::Box box{
         position,
-        computer_graphics::math::Vector3::One * 0.75f * scale,
+        computer_graphics::math::Vector3::One * 0.925f * scale,
         rotation,
     };
     return computer_graphics::BoxCollision{box};

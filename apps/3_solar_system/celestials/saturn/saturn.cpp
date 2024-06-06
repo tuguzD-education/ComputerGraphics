@@ -41,6 +41,6 @@ bool Saturn::Intersects(const computer_graphics::math::Ray& ray, float& dist) co
 computer_graphics::SphereCollision Saturn::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.25f};
+    const computer_graphics::math::Sphere sphere{position, 0.235f};
     return computer_graphics::SphereCollision{sphere};
 }

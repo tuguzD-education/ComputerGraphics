@@ -7,7 +7,7 @@
 
 namespace computer_graphics {
 
-constexpr float OrbitCameraManager::min_distance = 0.75f;
+float OrbitCameraManager::min_distance = 0.75f;
 
 OrbitCameraManager::OrbitCameraManager(class Game& game, const Initializer& initializer)
     : CameraManager(game),
@@ -23,11 +23,12 @@ OrbitCameraManager::OrbitCameraManager(class Game& game, const Initializer& init
           : (camera_.get().Transform().position - target_.get().WorldTransform().position).Length()},
       sensitivity_{initializer.sensitivity},
       zoom_speed_{initializer.zoom_speed},
+      target_size_{initializer.target_size},
       wheel_delta_{} {
     if (const auto input = Game().Input(); input != nullptr) {
         input->OnMouseMove().AddRaw(this, &OrbitCameraManager::OnMouseMove);
     }
-    FitToTarget(0.75f);
+    if (initializer.fit_to_target) FitToTarget();
 }
 
 OrbitCameraManager::~OrbitCameraManager() {
@@ -105,9 +106,9 @@ void OrbitCameraManager::Update(const float delta_time) {
         transform.rotation = math::Quaternion::CreateFromYawPitchRoll(yaw, pitch, 0.0f);
 
         distance_ -= static_cast<float>(wheel_delta_) * zoom_speed_ * delta_time;
-        // if (distance_ < min_distance) {
-        //     distance_ = min_distance;
-        // }
+        if (distance_ < min_distance) {
+            distance_ = min_distance;
+        }
     }
     transform.position = target_.get().WorldTransform().position - transform.Forward() * distance_;
 
@@ -115,11 +116,12 @@ void OrbitCameraManager::Update(const float delta_time) {
     wheel_delta_ = 0;
 }
 
-void OrbitCameraManager::FitToTarget(const float size = 0.75f) {
-    auto distance = size / (2.0f * std::tan(
+void OrbitCameraManager::FitToTarget() {
+    auto distance = target_size_ / (2.0f * std::tan(
         reinterpret_cast<PerspectiveProjection&>(camera_.get().Projection()).HorizontalFOV() / 2.0f));
 
-    distance_ = distance + size;
+    distance_ = distance + target_size_;
+    min_distance = distance_;
 }
 
 void OrbitCameraManager::OnMouseMove(const MouseMoveData& data) {

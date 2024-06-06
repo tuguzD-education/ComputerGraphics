@@ -42,6 +42,6 @@ bool Mercury::Intersects(const computer_graphics::math::Ray& ray, float& dist) c
 computer_graphics::SphereCollision Mercury::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.125f};
+    const computer_graphics::math::Sphere sphere{position, 0.17f};
     return computer_graphics::SphereCollision{sphere};
 }

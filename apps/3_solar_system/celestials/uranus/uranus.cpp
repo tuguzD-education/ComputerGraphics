@@ -8,10 +8,9 @@ computer_graphics::GeometricPrimitiveComponent& CreateUranusMesh(
     computer_graphics::Game& game, const computer_graphics::SceneComponent* parent) {
     computer_graphics::GeometricPrimitiveComponent::Initializer initializer{
         .primitive_arguments =
-            computer_graphics::ConeGeometricPrimitiveArguments{
-                .diameter = 0.5f,
-                .height = 0.5f,
-                .tessellation = 8,
+            computer_graphics::SphereGeometricPrimitiveArguments{
+                .diameter = 0.35f,
+                .tessellation = 16,
             },
         .color = computer_graphics::math::colors::linear::LightSkyBlue.v,
     };
@@ -43,6 +42,6 @@ bool Uranus::Intersects(const computer_graphics::math::Ray& ray, float& dist) co
 computer_graphics::SphereCollision Uranus::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.25f};
+    const computer_graphics::math::Sphere sphere{position, 0.185f};
     return computer_graphics::SphereCollision{sphere};
 }

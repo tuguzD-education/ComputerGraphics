@@ -16,9 +16,9 @@ class Deimos final : public computer_graphics::SceneComponent, public computer_g
     [[nodiscard]] bool Intersects(const Collision &other) const override;
     [[nodiscard]] bool Intersects(const computer_graphics::math::Ray &ray, float &dist) const override;
 
-  private:
     [[nodiscard]] computer_graphics::BoxCollision CollisionPrimitive() const;
 
+  private:
     std::reference_wrapper<computer_graphics::GeometricPrimitiveComponent> mesh_;
 };
 

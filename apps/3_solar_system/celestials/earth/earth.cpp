@@ -43,7 +43,7 @@ computer_graphics::BoxCollision Earth::CollisionPrimitive() const {
 
     const computer_graphics::math::Box box{
         position,
-        computer_graphics::math::Vector3::One * 0.25f * scale,
+        computer_graphics::math::Vector3::One * 0.375f * scale,
         rotation,
     };
     return computer_graphics::BoxCollision{box};

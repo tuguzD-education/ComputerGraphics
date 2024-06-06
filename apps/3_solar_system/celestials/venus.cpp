@@ -50,7 +50,7 @@ computer_graphics::BoxCollision Venus::CollisionPrimitive() const {
 
     const computer_graphics::math::Box box{
         position,
-        computer_graphics::math::Vector3::One * 0.125f * scale,
+        computer_graphics::math::Vector3::One * 0.275f * scale,
         rotation,
     };
     return computer_graphics::BoxCollision{box};

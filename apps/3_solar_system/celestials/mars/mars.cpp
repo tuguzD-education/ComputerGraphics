@@ -41,6 +41,6 @@ bool Mars::Intersects(const computer_graphics::math::Ray& ray, float& dist) cons
 computer_graphics::SphereCollision Mars::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.25f};
+    const computer_graphics::math::Sphere sphere{position, 0.275f};
     return computer_graphics::SphereCollision{sphere};
 }

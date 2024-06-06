@@ -11,15 +11,19 @@ namespace computer_graphics {
 
 class OrbitCameraManager : public CameraManager {
   public:
-    static const float min_distance;
+    static float min_distance;
 
     struct Initializer : CameraManager::Initializer {
         std::reference_wrapper<const SceneComponent> target;
         Camera *camera = nullptr;
         InputKey enable_look_input_key = InputKey::MiddleButton;
+
         float distance = min_distance;
         float sensitivity = 1.0f;
         float zoom_speed = 50.0f;
+
+        float target_size = min_distance;
+        bool fit_to_target = false;
     };
 
     explicit OrbitCameraManager(class Game &game, const Initializer &initializer);
@@ -42,7 +46,7 @@ class OrbitCameraManager : public CameraManager {
 
     void Update(float delta_time) override;
 
-    void FitToTarget(float size);
+    void FitToTarget();
 
   private:
     void OnMouseMove(const MouseMoveData &data);
@@ -54,6 +58,7 @@ class OrbitCameraManager : public CameraManager {
     float distance_;
     float sensitivity_;
     float zoom_speed_;
+    float target_size_;
 
     math::Vector2 mouse_offset_;
     std::int32_t wheel_delta_;

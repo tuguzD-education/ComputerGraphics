@@ -307,12 +307,13 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
             }
             break;
         }
-        // TODO: "Fit to view" feature from UE5 (fully fit camera frustrum onto each celestial body)
         case computer_graphics::InputKey::D1: {
             CameraManager<computer_graphics::OrbitCameraManager>(
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = sun_,
                     .camera = &camera_,
+                    .target_size = sun_.CollisionPrimitive().Primitive().Extents.x,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -321,6 +322,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = mercury_,
                     .camera = &camera_,
+                    .target_size = mercury_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -329,6 +332,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = venus_,
                     .camera = &camera_,
+                    .target_size = venus_.CollisionPrimitive().Primitive().Extents.x,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -337,6 +342,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = earth_,
                     .camera = &camera_,
+                    .target_size = earth_.CollisionPrimitive().Primitive().Extents.x,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -345,6 +352,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = mars_,
                     .camera = &camera_,
+                    .target_size = mars_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -353,6 +362,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = jupyter_,
                     .camera = &camera_,
+                    .target_size = jupyter_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -361,6 +372,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = saturn_,
                     .camera = &camera_,
+                    .target_size = saturn_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -369,6 +382,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = uranus_,
                     .camera = &camera_,
+                    .target_size = uranus_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }
@@ -377,6 +392,8 @@ void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {
                     computer_graphics::OrbitCameraManager::Initializer{
                     .target = neptune_,
                     .camera = &camera_,
+                    .target_size = neptune_.CollisionPrimitive().Primitive().Radius,
+                    .fit_to_target = true,
                 });
             break;
         }

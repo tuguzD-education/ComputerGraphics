@@ -41,6 +41,6 @@ bool Neptune::Intersects(const computer_graphics::math::Ray& ray, float& dist) c
 computer_graphics::SphereCollision Neptune::CollisionPrimitive() const {
     auto [position, rotation, scale] = mesh_.get().WorldTransform();
 
-    const computer_graphics::math::Sphere sphere{position, 0.375f};
+    const computer_graphics::math::Sphere sphere{position, 0.675f};
     return computer_graphics::SphereCollision{sphere};
 }
