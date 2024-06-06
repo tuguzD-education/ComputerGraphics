@@ -28,7 +28,7 @@ class TriangleComponent : public SceneComponent {
         math::Vector2 tile_count = math::Vector2::One;
         Material material;
 
-        bool is_casting_shadow = true;
+        bool is_casting_shadow = false;
     };
 
     explicit TriangleComponent(class Game &game, const Initializer &initializer = {});
