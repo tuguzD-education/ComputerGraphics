@@ -19,14 +19,28 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
       },
       field_{AddComponent<Field>()},
       player_{AddComponent<Player>()},
+      m91_{AddComponent<M91>(Sign::Initializer{.transform = computer_graphics::Transform{
+          .position = computer_graphics::math::Vector3::Right * 2.0f +
+              computer_graphics::math::Vector3::Backward * 3.0f,
+          .scale = computer_graphics::math::Vector3::One,
+      }})},
       sign_{AddComponent<Sign>(Sign::Initializer{.transform = computer_graphics::Transform{
           .position = computer_graphics::math::Vector3::Right * 2.0f +
               computer_graphics::math::Vector3::Forward * 3.0f,
           .scale = computer_graphics::math::Vector3::One * 0.2f,
       }})},
       gear_{AddComponent<Gear>(Sign::Initializer{.transform = computer_graphics::Transform{
-          .position = computer_graphics::math::Vector3::Right * -2.0f +
-              computer_graphics::math::Vector3::Forward * -3.0f,
+          .position = computer_graphics::math::Vector3::Left * 2.0f +
+              computer_graphics::math::Vector3::Backward * 3.0f,
+          .scale = computer_graphics::math::Vector3::One,
+      }})},
+      bench_{AddComponent<Bench>(Sign::Initializer{.transform = computer_graphics::Transform{
+          .position = computer_graphics::math::Vector3::Left * 2.0f +
+              computer_graphics::math::Vector3::Forward * 3.0f,
+          .scale = computer_graphics::math::Vector3::One,
+      }})},
+      portal_{AddComponent<Portal>(Sign::Initializer{.transform = computer_graphics::Transform{
+          .position = computer_graphics::math::Vector3::Forward * 6.0f,
           .scale = computer_graphics::math::Vector3::One,
       }})} {
     using computer_graphics::OrbitCameraManager;
@@ -46,12 +60,13 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
     DirectionalLight().Specular() = math::Color{math::colors::linear::White};
     DirectionalLight().Direction(math::Normalize(math::Vector3::Down + math::Vector3::Forward));
 
-    PointLight().IsLightEnabled() = false;
+    PointLight().IsLightEnabled() = true;
+    PointLight().Parent(&portal_.get());
     PointLight().Ambient() = math::Color{math::colors::linear::Black};
-    PointLight().Diffuse() = math::Color{math::colors::linear::White};
+    PointLight().Diffuse() = math::Color{math::colors::linear::Purple} * 5.0f;
     PointLight().Specular() = math::Color{math::colors::linear::White};
     PointLight().Attenuation().linear_factor = math::Color{math::colors::linear::White};
-    PointLight().Transform() = computer_graphics::Transform{.position = math::Vector3::Up * 0.2f};
+    PointLight().Transform() = computer_graphics::Transform{.position = math::Vector3::Up * 1.0f};
 }
 
 void Game::Update(const float delta_time) {
@@ -80,7 +95,7 @@ void Game::Update(const float delta_time) {
     direction.Normalize();
 
     computer_graphics::Transform player_transform = player_.get().WorldTransform();
-    player_transform.position += direction * delta_time;
+    player_transform.position += direction * delta_time * 2.0f;
     if (direction.LengthSquared() > 0.1f) {
         const auto additional = math::Quaternion::CreateFromAxisAngle(
             -direction.Cross(math::Vector3::Up), std::numbers::pi_v<float> * 0.5f * delta_time);

@@ -3,8 +3,11 @@ set(HEADER_LIST
         player.hpp
         field.hpp
         game.hpp
+        objects/M91.hpp
         objects/sign.hpp
-        objects/gear.hpp)
+        objects/gear.hpp
+        objects/bench.hpp
+        objects/portal.hpp)
 set(SOURCE_LIST
         main.cpp
         player.cpp
