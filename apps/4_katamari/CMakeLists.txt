@@ -7,11 +7,13 @@ set(HEADER_LIST
         objects/sign.hpp
         objects/gear.hpp
         objects/bench.hpp
-        objects/portal.hpp)
+        objects/portal.hpp
+        player_child.hpp)
 set(SOURCE_LIST
         main.cpp
         player.cpp
-        game.cpp)
+        game.cpp
+        player_child.cpp)
 
 add_executable(4_katamari ${SOURCE_LIST} ${HEADER_LIST})
 target_compile_features(4_katamari PRIVATE cxx_std_20)

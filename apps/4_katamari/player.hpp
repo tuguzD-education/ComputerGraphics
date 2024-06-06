@@ -7,7 +7,9 @@
 #include <computer_graphics/input.hpp>
 #include <computer_graphics/mesh_component.hpp>
 
-class Player final : public computer_graphics::MeshComponent<>, public computer_graphics::Collision {
+#include "player_child.hpp"
+
+class Player final : public computer_graphics::MeshComponent<PlayerChild>, public computer_graphics::Collision {
   public:
     struct ControlKeys {
         using enum computer_graphics::InputKey;
