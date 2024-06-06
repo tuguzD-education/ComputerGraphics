@@ -20,9 +20,8 @@ Game::Game(computer_graphics::Window &window, computer_graphics::Input &input)
               return initializer;
           }()),
       },
-      sun_{
-          AddComponent<Sun>(),
-      },
+      skybox_{AddComponent<Skybox>()},
+      sun_{AddComponent<Sun>()},
       mercury_{
           AddComponent<Mercury>(Mercury::Initializer{
               .transform = computer_graphics::Transform{
@@ -245,6 +244,8 @@ void Game::Update(const float delta_time) {
         math::Quaternion::CreateFromAxisAngle(sun_axis, 2.0f * delta_time);
     auto &sun_mesh_rotation = sun_.Mesh().Transform().rotation;
     sun_mesh_rotation = math::Quaternion::Concatenate(sun_mesh_rotation, sun_around_self);
+
+    skybox_.Transform().position = camera_.Transform().position;
 }
 
 void Game::OnInputKeyDown(const computer_graphics::InputKey input_key) {

@@ -13,7 +13,8 @@ set(HEADER_LIST
         celestials/uranus/uranus.hpp
         celestials/venus.hpp
         celestials/saturn/saturn_ring.hpp
-        celestials/uranus/uranus_ring.hpp)
+        celestials/uranus/uranus_ring.hpp
+        skybox.hpp)
 set(SOURCE_LIST
         main.cpp
         game.cpp
@@ -30,7 +31,8 @@ set(SOURCE_LIST
         celestials/uranus/uranus.cpp
         celestials/venus.cpp
         celestials/saturn/saturn_ring.cpp
-        celestials/uranus/uranus_ring.cpp)
+        celestials/uranus/uranus_ring.cpp
+        skybox.cpp)
 
 add_executable(3_solar_system ${SOURCE_LIST} ${HEADER_LIST})
 target_compile_features(3_solar_system PRIVATE cxx_std_20)

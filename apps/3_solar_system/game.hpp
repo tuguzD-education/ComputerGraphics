@@ -19,19 +19,21 @@
 #include "celestials/uranus/uranus.hpp"
 #include "celestials/uranus/uranus_ring.hpp"
 #include "celestials/venus.hpp"
+#include "skybox.hpp"
 
 class Game final : public computer_graphics::Game {
-public:
+  public:
     explicit Game(computer_graphics::Window &window, computer_graphics::Input &input);
     ~Game() override;
 
-protected:
+  protected:
     void Update(float delta_time) override;
 
-private:
+  private:
     void OnInputKeyDown(computer_graphics::InputKey input_key);
 
     computer_graphics::Camera &camera_;
+    Skybox &skybox_;
 
     Sun &sun_;
 

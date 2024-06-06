@@ -47,7 +47,7 @@ std::array<BoxComponent::Vertex, 24> BoxVertices(
             math::Vector3{left, bottom, backward},
             math::Vector3::Backward,
             color,
-            math::Vector2{-1.0f, 1.0f},
+            math::Vector2{1.0f, 1.0f},
         },
         BoxComponent::Vertex{
             math::Vector3{right, bottom, backward},
@@ -65,7 +65,7 @@ std::array<BoxComponent::Vertex, 24> BoxVertices(
             math::Vector3{left, top, backward},
             math::Vector3::Backward,
             color,
-            math::Vector2{-1.0f, 0.0f},
+            math::Vector2{1.0f, 0.0f},
         },
 
         // Top Face
@@ -99,25 +99,25 @@ std::array<BoxComponent::Vertex, 24> BoxVertices(
             math::Vector3{left, bottom, forward},
             math::Vector3::Down,
             color,
-            math::Vector2{1.0f, 1.0f},
+            math::Vector2{0.0f, 0.0f},
         },
         BoxComponent::Vertex{
             math::Vector3{right, bottom, forward},
             math::Vector3::Down,
             color,
-            math::Vector2{0.0f, 1.0f},
+            math::Vector2{1.0f, 0.0f},
         },
         BoxComponent::Vertex{
             math::Vector3{right, bottom, backward},
             math::Vector3::Down,
             color,
-            math::Vector2{0.0f, 0.0f},
+            math::Vector2{1.0f, 1.0f},
         },
         BoxComponent::Vertex{
             math::Vector3{left, bottom, backward},
             math::Vector3::Down,
             color,
-            math::Vector2{1.0f, 0.0f},
+            math::Vector2{0.0f, 1.0f},
         },
 
         // Left Face
