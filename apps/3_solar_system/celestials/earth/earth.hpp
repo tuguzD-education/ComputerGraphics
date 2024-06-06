@@ -18,6 +18,8 @@ class Earth final : public computer_graphics::SceneComponent, public computer_gr
 
     [[nodiscard]] computer_graphics::BoxCollision CollisionPrimitive() const;
 
+    // void Draw(const computer_graphics::Camera* camera) override;
+
   private:
     std::reference_wrapper<computer_graphics::BoxComponent> mesh_;
 };

@@ -44,3 +44,9 @@ computer_graphics::SphereCollision Moon::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.05f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Moon::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

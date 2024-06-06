@@ -44,3 +44,9 @@ computer_graphics::SphereCollision Saturn::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.235f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Saturn::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

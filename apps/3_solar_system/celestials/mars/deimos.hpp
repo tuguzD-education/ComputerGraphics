@@ -18,6 +18,8 @@ class Deimos final : public computer_graphics::SceneComponent, public computer_g
 
     [[nodiscard]] computer_graphics::BoxCollision CollisionPrimitive() const;
 
+    // void Draw(const computer_graphics::Camera* camera) override;
+
   private:
     std::reference_wrapper<computer_graphics::GeometricPrimitiveComponent> mesh_;
 };

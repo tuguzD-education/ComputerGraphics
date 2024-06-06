@@ -50,3 +50,9 @@ computer_graphics::BoxCollision Sun::CollisionPrimitive() const {
     };
     return computer_graphics::BoxCollision{box};
 }
+
+// void Sun::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawBox(CollisionPrimitive().Primitive());
+// }

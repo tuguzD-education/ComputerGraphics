@@ -45,3 +45,9 @@ computer_graphics::SphereCollision Uranus::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.185f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Uranus::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

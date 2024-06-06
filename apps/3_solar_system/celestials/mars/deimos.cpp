@@ -49,3 +49,9 @@ computer_graphics::BoxCollision Deimos::CollisionPrimitive() const {
     };
     return computer_graphics::BoxCollision{box};
 }
+
+// void Deimos::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawBox(CollisionPrimitive().Primitive());
+// }

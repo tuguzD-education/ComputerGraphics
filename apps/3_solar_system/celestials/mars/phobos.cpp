@@ -44,3 +44,9 @@ computer_graphics::SphereCollision Phobos::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.1f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Phobos::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

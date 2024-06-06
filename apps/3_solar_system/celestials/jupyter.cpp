@@ -44,3 +44,9 @@ computer_graphics::SphereCollision Jupyter::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.475f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Jupyter::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

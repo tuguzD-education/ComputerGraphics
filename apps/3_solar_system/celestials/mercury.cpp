@@ -45,3 +45,9 @@ computer_graphics::SphereCollision Mercury::CollisionPrimitive() const {
     const computer_graphics::math::Sphere sphere{position, 0.17f};
     return computer_graphics::SphereCollision{sphere};
 }
+
+// void Mercury::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawSphere(CollisionPrimitive().Primitive());
+// }

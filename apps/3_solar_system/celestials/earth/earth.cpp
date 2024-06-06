@@ -48,3 +48,9 @@ computer_graphics::BoxCollision Earth::CollisionPrimitive() const {
     };
     return computer_graphics::BoxCollision{box};
 }
+
+// void Earth::Draw(const computer_graphics::Camera* camera) {
+//     SceneComponent::Draw(camera);
+//
+//     Game().DebugDraw().DrawBox(CollisionPrimitive().Primitive());
+// }
